@@ -1,0 +1,302 @@
+body {
+  min-height: 800px;
+  min-width:  1024px;
+  width: auto !important;
+  overflow:   hidden;
+}
+
+
+body {
+  background-color: white;
+  color:            black;
+  font-size:        14px;
+  font-family:      sans-serif;
+  font:             12px Arial;
+
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently */
+}
+
+div, input, select, textarea {
+  box-sizing: border-box;
+}
+
+input, select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0px;
+}
+
+input, select {
+  border: none;
+  border-bottom: 1px solid darkgrey;
+}
+
+input:required, select:required {
+  border-bottom: 1px solid red;
+}
+
+input[readonly] {
+  border-bottom: none;
+}
+
+select {
+  background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAACXBIWXMAAA3XAAAN1wFCKJt4AAABWWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS40LjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6T3JpZW50YXRpb24+CiAgICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgpMwidZAAAAe0lEQVQYGWWNQQqAIBBFm6K1eBbpAOomWhQUXiaKgg7mtlNJ81PEaEDm+b7jVFUsSr1s0Sml2mTrIn0ZWS2lHLTWM4fBOdfggNktQogeQ2SMOViMuKCYJ3YbI+XdLE4iuvEghNB57y8wKu/myd1au0b9zfJPRfhzpcj8ABbkF5o44buYAAAAAElFTkSuQmCC') no-repeat 188px 4px;
+}
+
+select.valid {
+  background-color: white;
+}
+
+textare:focus, select:focus, input:focus {
+  border-color: green;
+}
+
+/*----------------------------------------------------------------------------*/
+
+#copyright {
+  position:  absolute;
+  right:     0px;
+  bottom:    0px;
+  padding:   8px;
+  font-size: 8px;
+  z-index:   1000;
+}
+
+#copyright a {
+  text-decoration: none;
+  color:           #eee;
+  padding-right:   32px;
+}
+
+#copyright a:hover {
+  color:           #888;
+}
+
+/*----------------------------------------------------------------------------*/
+
+#app {
+  position: absolute;
+  left:     0px;
+  right:    0px;
+  top:      0px;
+  bottom:   0px;
+}
+
+#appheader {
+  position:         absolute;
+  left:             0px;
+  right:            0px;
+  top:              0px;
+  height:           56px;
+  line-height:      32px;
+  vertical-align:   middle;
+  background-color: lightgrey;
+  border-bottom:    1px solid grey;
+  min-width:        1024px;
+}
+
+#appnavigation {
+  position:    absolute;
+  left:        0px;
+  width:       320px;
+  bottom:      0px;
+  top:         56px;
+  overflow-y:  auto;
+  overflow-x:  hidden;
+
+  border-right: 1px solid grey;
+  min-height:   544px;
+
+  background-color: #eee;
+}
+
+#appheader .tabs {
+  position:      absolute;
+  left:          0px;
+  width:         320px;
+  top:           32px;
+  height:        24px;
+  border-bottom: 1px solid grey;
+}
+
+#appheader .tabs div {
+  float:                    left;
+  line-height:              20px;
+  padding-left:             4px;
+  padding-right:            4px;
+  border-top-left-radius:   8px;
+  border-top-right-radius:  8px;
+  cursor:                   pointer;
+  background-color:         lightgrey;
+  margin-top:               2px;
+  border-left:              1px solid grey;
+  border-right:             1px solid grey;
+  border-top:               1px solid grey;
+  margin-left:              1px;
+  font-size:                11px;
+}
+
+#appheader .tabs div.active {
+  background-color:         grey;
+  border-left:              1px solid grey;
+  border-right:             1px solid grey;
+  border-top:               1px solid grey;
+  color:                    white;
+}
+
+#appheader .tabs div.button {
+  float:            right;
+  margin:           4px;
+  height:           16px;
+  font-size:        8px;
+  line-height:      16px;
+  background-color: darkgrey;
+  padding-right:    4px;
+  border:           none;
+  border-radius:    8px;
+  vertical-align:   middle;
+  text-align:       center;
+}
+
+#appheader .tabs div.button:hover {
+  background-color: darkgrey;
+  color:            white;
+}
+
+/*----------------------------------------------------------------------------*/
+
+#appnavigation > div {
+  position:         absolute;
+  left:             0px;
+  right:            0px;
+  top:              0px;
+  bottom:           0px;
+  background-color: #eee;
+}
+
+#appnavigation .list .item {
+  display:       flex;
+  width:         auto;
+  padding-left:  8px;
+  height:        32px;
+  line-height:   32px;
+  border-bottom: 1px solid grey;
+}
+
+#appnavigation .list .item:hover {
+  background-color: lightblue;
+}
+
+#appnavigation .list .item .name {
+  flex:          1;
+  height:        32px;
+  line-height:   32px;
+  text-overflow: ellipsis;
+  overflow:      hidden;
+  white-space:   nowrap;
+}
+
+#appnavigation .list .item .button {
+  float:            right;
+  margin-top:       8px;
+  margin-right:     4px;
+  height:           16px;
+  width:            16px;
+  font-size:        8px;
+  line-height:      16px;
+  background-color: darkgrey;
+  border:           none;
+  border-radius:    8px;
+  vertical-align:   middle;
+  text-align:       center;
+}
+
+#appnavigation .list .item .button:hover {
+  background-color: darkgrey;
+  color:            white;
+}
+/*----------------------------------------------------------------------------*/
+
+#appdetail {
+  position:    absolute;
+  left:        320px;
+  right:       0px;
+  bottom:      0px;
+  top:         56px;
+  overflow-y: scroll;
+  min-height:  544px;
+  min-width:   704px;
+}
+
+/*----------------------------------------------------------------------------*/
+
+#appheader .logo {
+  position:       absolute;
+  top:            4px;
+  left:           4px;
+  height:         28px;
+  line-height:    28px;
+  padding-left:   4px;
+  padding-right:  4px;
+  vertical-align: middle;
+  overflow:       hidden;
+  text-overflow:  ellipsis;
+  font-size:      20px;
+  color:          #aaa;
+}
+
+#appheader .label {
+  position:       absolute;
+  top:            32px;
+  left:           320px;
+  height:         20px;
+  line-height:    20px;
+  padding-left:   4px;
+  padding-right:  4px;
+  vertical-align: middle;
+  overflow:       hidden;
+  text-overflow:  ellipsis;
+  font-size:      16px;
+}
+
+/*----------------------------------------------------------------------------*/
+
+#appheader .buttons {
+  position:       absolute;
+  right:          0px;
+  top:            4px;
+  height:         20px;
+  padding-right:  32px;
+}
+
+#appheader .buttons div {
+  float:          left;
+  line-height:    20px;
+  padding-left:   4px;
+  padding-right:  4px;
+  margin-left:    2px;
+  margin-right:   2px;
+  border-radius:  4px;
+  cursor:         pointer;
+  color:          darkgrey;
+}
+
+#appheader .buttons div:hover {
+  color: black;
+}
+
+#appheader .buttons div:last-child {
+  padding-right:   4px;
+  width:           128px;
+}
+
+#appheader .buttons div.active {
+  background-color: blue;
+  color:            white;
+}
