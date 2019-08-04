@@ -71,7 +71,7 @@ Vue.component(
         return results;
       },
       components: function() {
-        return model.components.map(x => x.name)
+        return model.components.filter(x => x.placement != 'ROUTER').map(x => x.name)
       },
       all_networks: function() {
         return model.networks.map(x => x.name)
@@ -80,7 +80,7 @@ Vue.component(
         return this.component.interfaces.map(x => x.network)
       },
       zones: function() {
-        return ['OTHER','EXT','INT','MGMT']
+        return ['OTHER','EXT','INT','MGMT','ROUTER']
       },
       flavors: function() {
         return model.flavors.map(x => x.name)
@@ -126,22 +126,22 @@ Vue.component(
               {{ zone }}
             </option>
           </select>
-          <label for="flavor">Flavor:</label>
-          <select id="flavor" name="flavor" v-model="component.flavor" v-bind:class="{valid: flavors.includes(component.flavor)}" required>
+          <label for="flavor" v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'">Flavor:</label>
+          <select id="flavor" name="flavor" v-model="component.flavor" v-bind:class="{valid: flavors.includes(component.flavor)}"  v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'" required>
             <option disabled value="">Please select one</option>
             <option v-for="flavor in flavors" v-bind:value="flavor">
               {{ flavor }}
             </option>
           </select>
-          <label for="image">Image:</label>
-          <select id="image" name="image" v-model="component.image" v-bind:class="{valid: images.includes(component.image)}" required>
+          <label for="image" v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'">Image:</label>
+          <select id="image" name="image" v-model="component.image" v-bind:class="{valid: images.includes(component.image)}"  v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'" required>
             <option disabled value="">Please select one</option>
             <option v-for="image in images" v-bind:value="image">
               {{ image }}
             </option>
           </select>
         </div>
-        <div class="line">
+        <div class="line" v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'">
           <label for="min">Minimum:</label>
           <input id="min" name="min" v-model.number="component.min" type="number" required>
           <label for="size">Size:</label>
@@ -150,16 +150,16 @@ Vue.component(
           <input id="max" name="max" v-model.number="component.max" type="number" required>
         </div>
 
-        <div v-if="component.placement != 'OTHER'" class="subheader">Volumes:</div>
+        <div  v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'" class="subheader">Volumes:</div>
 
-        <div  v-if="component.placement != 'OTHER'" class="line">
+        <div v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'" class="line">
           <label class="top">Name:</label>
           <label class="top">Size:</label>
           <label class="top">Type:</label>
           <label class="top">Attributes:</label>
           <label v-on:click="addVolume"><i class="fas fa-plus-circle"/></label>
         </div>
-        <div  v-if="component.placement != 'OTHER'" class="line" v-for="(volume,index) in component.volumes">
+        <div v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'" class="line" v-for="(volume,index) in component.volumes">
           <input v-bind:id="'volumes_' + index + '_name'" v-bind:name="'volumes_' + index + '_name'" v-model="volume.name" required>
           <input v-bind:id="'volumes_' + index + '_size'" v-bind:name="'volumes_' + index + '_size'" v-model.number="volume.size" type="number" required>
           <select v-bind:id="'volumes_' + index + '_type'" v-bind:name="'volumes_' + index + '_type'" v-model="volume.type" v-bind:class="{valid: storagetypes.includes(volume.type)}" required>
@@ -172,16 +172,16 @@ Vue.component(
           <label v-on:click="delVolume(volume)"><i class="fas fa-minus-circle"/></label>
         </div>
 
-        <div class="subheader">Interfaces:</div>
+        <div v-if="component.placement != 'OTHER'" class="subheader">Interfaces:</div>
 
-        <div class="line">
+        <div class="line" v-if="component.placement != 'OTHER'">
           <label class="top">Network:</label>
           <label class="top">Attributes:</label>
           <label class="top"></label>
           <label class="top"></label>
           <label v-on:click="addInterface()"><i class="fas fa-plus-circle"/></label>
         </div>
-        <div class="line" v-for="(interface,index) in component.interfaces">
+        <div class="line" v-for="(interface,index) in component.interfaces" v-if="component.placement != 'OTHER'">
           <select v-bind:id="'interfaces_' + index + '_network'" v-bind:name="'interfaces_' + index + '_network'" v-model="interface.network" v-bind:class="{valid: all_networks.includes(interface.network)}" required>
             <option disabled value="">Please select one</option>
             <option v-for="network in all_networks" v-bind:value="network">
@@ -192,16 +192,16 @@ Vue.component(
           <label v-on:click="delInterface(interface)"><i class="fas fa-minus-circle"/></label>
         </div>
 
-        <div class="subheader">Services:</div>
+        <div class="subheader" v-if="component.placement != 'ROUTER'">Services:</div>
 
-        <div class="line">
+        <div class="line" v-if="component.placement != 'ROUTER'">
           <label class="top">Name:</label>
           <label class="top">Network</label>
           <label class="top">Protocol</label>
           <label class="top">Range:</label>
           <label v-on:click="addService()"><i class="fas fa-plus-circle"/></label>
         </div>
-        <div class="line" v-for="(service,index) in component.services">
+        <div class="line" v-for="(service,index) in component.services" v-if="component.placement != 'ROUTER'">
           <input v-bind:id="'services_' + index + '_name'" v-bind:name="'services_' + index + '_name'" v-model="service.name" required>
           <select v-bind:id="'services_' + index + '_network'" v-bind:name="'services_' + index + '_network'" v-model="service.network" v-bind:class="{valid: service.network !== ''}">
             <option disabled value="">Please select one</option>
@@ -219,15 +219,15 @@ Vue.component(
           <label v-on:click="delService(service)"><i class="fas fa-minus-circle"/></label>
         </div>
 
-        <div class="subheader">Dependencies:</div>
+        <div class="subheader" v-if="component.placement != 'ROUTER'">Dependencies:</div>
 
-        <div class="line">
+        <div class="line" v-if="component.placement != 'ROUTER'">
           <label class="top">Component:</label>
           <label class="top">Service:</label>
           <label class="top">Network</label>
           <label v-on:click="addDependency()"><i class="fas fa-plus-circle"/></label>
         </div>
-        <div class="line" v-for="(dependency,index) in component.dependencies">
+        <div class="line" v-for="(dependency,index) in component.dependencies" v-if="component.placement != 'ROUTER'">
           <select v-bind:id="'dependencies_' + index + '_component'" v-bind:name="'dependencies_' + index + '_component'" v-model="dependency.component" v-bind:class="{valid: components.includes(dependency.component)}" required>
             <option disabled value="">Please select one</option>
             <option v-for="component in components" v-bind:value="component">
@@ -250,13 +250,13 @@ Vue.component(
           <label v-on:click="delDependency(dependency)"><i class="fas fa-minus-circle"/></label>
         </div>
 
-        <div v-if="component.placement != 'OTHER'" class="subheader">User Data:</div>
+        <div v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'" class="subheader">User Data:</div>
 
-        <div v-if="component.placement != 'OTHER'" class="line">
+        <div v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'" class="line">
           <label class="top">Data:</label>
           <label v-on:click="addUserdata()"><i class="fas fa-plus-circle"/></label>
         </div>
-        <div v-if="component.placement != 'OTHER'" class="line" v-for="(userdata,index) in userdata">
+        <div v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'" class="line" v-for="(userdata,index) in userdata">
           <textarea class="userdata" v-bind:id="userdata.uuid" v-bind:name="userdata.uuid" v-model="component.userdata[userdata.index]"></textarea>
           <label v-on:click="delUserdata(userdata)"><i class="fas fa-minus-circle"/></label>
         </div>

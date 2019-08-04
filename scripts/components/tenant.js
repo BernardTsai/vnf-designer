@@ -20,6 +20,12 @@ Vue.component( 'tenant_network',
     methods: {
       handleChange: function(e) {
         if (e.target.value==="") {deleteNetwork(this.network)}
+      },
+      viewNetwork: function(e) {
+        this.view.navigation = "Network"
+        this.view.detail='Network';
+        this.view.entity=this.network;
+        return false;
       }
     },
     computed: {
@@ -44,7 +50,9 @@ Vue.component( 'tenant_network',
           left:        l + 'px',
           width:       w + 'px',
           height:      h + 'px'
-        }">
+        }"
+        v-on:click.alt="viewNetwork"
+        v-bind:title="'ipv4: ' + network.ipv4 + '\\nipv6: ' + network.ipv6">
         <input v-model="network.name" v-on:change="handleChange">
       </div>`
   }
@@ -147,6 +155,11 @@ Vue.component( 'tenant_component',
         if (e.target.value==="") {
           deleteComponent(this.component)
         }
+      },
+      viewComponent: function(e) {
+        this.view.navigation = "Component"
+        this.view.detail='Component';
+        this.view.entity=this.component;
       }
     },
     computed: {
@@ -166,7 +179,7 @@ Vue.component( 'tenant_component',
         return this.component.placement.substr(0,1).toUpperCase();
       },
       zones: function() {
-        return [{name: "OTHER", tag: 'O'}, {name: "EXT", tag: 'E'}, {name: "INT", tag: 'I'}, {name: "MGMT", tag: 'M'}]
+        return [{name: "OTHER", tag: 'O'}, {name: "EXT", tag: 'E'}, {name: "INT", tag: 'I'}, {name: "MGMT", tag: 'M'}, {name: "ROUTER", tag: 'R'}]
       }
     },
     template: `
@@ -177,7 +190,8 @@ Vue.component( 'tenant_component',
           left:   l + 'px',
           width:  w + 'px',
           height: h + 'px'
-        }">
+        }"
+        v-on:click.alt="viewComponent">
         <div v-bind:class="'zone zone-' + z">
           <select v-model="component.placement">
             <option disabled value="">Please select one</option>
@@ -187,7 +201,7 @@ Vue.component( 'tenant_component',
           </select>
         </div>
         <div class="name"><input v-model="component.name" v-on:change="handleChange"></div>
-        <div class="sizing">({{component.min}}/{{component.size}}/{{component.max}})</div>
+        <div class="sizing" v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'">({{component.min}}/{{component.size}}/{{component.max}})</div>
         <tenant_interface
           v-for="(interface, subindex) in component.interfaces"
           :key="subindex"
@@ -329,20 +343,75 @@ Vue.component( 'tenantform',
         var networks = zip.folder("networks");
         var servers  = zip.folder("servers");
 
+        // construct a folder for each internal component
+        var server_folders = {}
+        for (var c of model.components) {
+          if (c.placement != "OTHER" && c.placement != "ROUTER" ) {
+            server_folders[c.name] = servers.folder(c.name);
+          }
+        }
+
         // export networks create file
         var txt = render(model, "Networks (create)")
-        networks.file("create.yml", txt)
+        networks.file("create.yml", txt, {unixPermissions: "755"})
 
         // export networks delete file
         var txt = render(model, "Networks (delete)")
-        networks.file("delete.yml", txt)
+        networks.file("delete.yml", txt, {unixPermissions: "755"})
 
         // export networks status file
         var txt = render(model, "Networks (status)")
-        networks.file("status.yml", txt)
+        networks.file("status.yml", txt, {unixPermissions: "755"})
 
-        // export networks template file
+        // export servers status file
+        var txt = render(model, "Servers (status)")
+        servers.file("status.yml", txt, {unixPermissions: "755"})
+
+        // export server security definition files
+        var txt  = render(model, "Servers (define security)")
+        var txts = splitter(txt)
+
+        for (var server in txts) {
+          var folder  = server_folders[server]
+          var content = txts[server]
+          folder.file("define_security.yml", content, {unixPermissions: "755"})
+        }
+
+        // export server security undefinition files
+        var txt  = render(model, "Servers (undefine security)")
+        var txts = splitter(txt)
+
+        for (var server in txts) {
+          var folder  = server_folders[server]
+          var content = txts[server]
+          folder.file("undefine_security.yml", content, {unixPermissions: "755"})
+        }
+
+        // export server creation files
+        var txt  = render(model, "Servers (create)")
+        var txts = splitter(txt)
+
+        for (var server in txts) {
+          var folder  = server_folders[server]
+          var content = txts[server]
+          folder.file("create.yml", content, {unixPermissions: "755"})
+        }
+
+        // export server deletion files
+        var txt  = render(model, "Servers (delete)")
+        var txts = splitter(txt)
+
+        for (var server in txts) {
+          var folder  = server_folders[server]
+          var content = txts[server]
+          folder.file("delete.yml", content, {unixPermissions: "755"})
+        }
+
+        // export networks and servers template file
         networks.file("networks.tmpl", files['networks.tmpl'])
+        servers.file( "servers.tmpl",  files['servers.tmpl'])
+        zip.file(     "ansible.cfg",   files['ansible.cfg'])
+        zip.file(     "inventory",     files['inventory'])
 
         // generate blob
         zip.generateAsync({type:"blob"})
@@ -432,6 +501,15 @@ Vue.component( 'tenantform',
       <div class="line">
         <label for="tenant_jumphost">Jumphost:</label>
         <input v-model="model.tenant.jumphost" id="tenant_jumphost" name="tenant_jumphost" required>
+      </div>
+      <hr/>
+      <div class="line">
+        <label for="tenant_proxy_http">http proxy:</label>
+        <input v-model="model.tenant.proxy.http" id="tenant_proxy_http" name="tenant_proxy_http">
+      </div>
+      <div class="line">
+        <label for="tenant_proxy_https">https proxy:</label>
+        <input v-model="model.tenant.proxy.https" id="tenant_proxy_https" name="tenant_proxy_https">
       </div>
       <hr/>
         <br/>

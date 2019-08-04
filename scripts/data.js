@@ -3,23 +3,26 @@ var data = `
 vnf:        5G-Core
 version:    1.0.0
 tenant:
-  name:     5g_trial
+  name:     5g
   auth:
-    username:    username
-    password:    password
-    proxy:       proxy_url
-    url:         url
-    cert:        cert
+    username:    ""
+    password:    ""
+    proxy:       ""
+    url:         ""
+    cert:        ""
     region:      RegionOne
     vol_api:     "2"
-    plugin:      v2password
+    plugin:      password
   service:
-    network:     5g_trial_svc2
-    cidr:        10.235.0.0/16
-    gateway:     10.235.140.70
-    proxy:       10.235.31.131
-    port:        3128
-  jumphost:      192.168.178.1
+    network:     ""
+    cidr:        ""
+    gateway:     ""
+    proxy:       ""
+    port:        ""
+  jumphost:      ""
+  proxy:
+    http:        "http://localhost:3128"
+    https:       "http://localhost:3128"
 flavors:
   - uuid:    "29539307-5dd5-49ab-a562-f2e6073798b0"
     name:    "none"
@@ -91,6 +94,13 @@ flavors:
     disk:    60
     public:  "false"
     special: []
+  - uuid:    "fd299723-d1c8-46e7-9af3-be1b76475839"
+    name:    "5g_trial.32_64_50"
+    vcpu:    32
+    ram:     65536
+    disk:    50
+    public:  "false"
+    special: []
 images:
 - { uuid: "5b16f37c-eeae-4f3a-8a4e-f442cbc381e0", name: "none", version: "0", format: "qcow2", container: "bare", disk: "", size: "0", checksum: "-", url: "-", special: "" }
 - { uuid: "5b16f37c-eeae-4f3a-8a4e-f442cbc381e1", name: "Cirros-0.4.0-x86_64", version: "0.4.0", format: "qcow2", container: "bare", disk: "", size: "12", checksum: "443b7623e27ecf03dc9e01ee93f67afe", url: "http://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img", special: "" }
@@ -104,13 +114,13 @@ images:
 - { uuid: "42e5f386-312e-4f34-9b0d-b32ccb749241", name: "EAST", version: "0", format: "qcow2", container: "bare", disk: "", size: "3678011392", checksum: "5e1031edd0ad32d42b0468fc0e94278d", url: "EAST", special: "" }
 - { uuid: "26fd061a-9de0-471d-be09-71915c4d4abb", name: "Centos7.0_060719", version: "7.0", format: "qcow2", container: "bare", disk: "", size: "1145831424", checksum: "7b232022649afeb1fc41f31511573a13", url: "Centos7.0_060719", special: "" }
 networks:
-  - uuid:      "138e7669-4af5-4c6a-b8ae-7b17465810a0"
+  - uuid:      "1 38e7669-4af5-4c6a-b8ae-7b17465810a0"
     name:      "test"
     external:  false
     ipv4:      "172.31.10.0/24"
     ipv4gw:    "172.31.10.1"
     ipv4start: "172.31.10.100"
-    ipv4end:   "172.31.10.199"
+    ipv4end:   "172.31.10.149"
     ipv6:      ""
     ipv6gw:    ""
     ipv6start: ""
@@ -125,7 +135,7 @@ networks:
     ipv4:      "172.31.3.0/24"
     ipv4gw:    "172.31.3.1"
     ipv4start: "172.31.3.100"
-    ipv4end:   "172.31.3.199"
+    ipv4end:   "172.31.3.149"
     ipv6:      ""
     ipv6gw:    ""
     ipv6start: ""
@@ -140,7 +150,7 @@ networks:
     ipv4:      "172.31.5.0/24"
     ipv4gw:    "172.31.5.1"
     ipv4start: "172.31.5.100"
-    ipv4end:   "172.31.5.199"
+    ipv4end:   "172.31.5.149"
     ipv6:      ""
     ipv6gw:    ""
     ipv6start: ""
@@ -155,7 +165,7 @@ networks:
     ipv4:      "172.31.6.0/24"
     ipv4gw:    "172.31.6.1"
     ipv4start: "172.31.6.100"
-    ipv4end:   "172.31.6.199"
+    ipv4end:   "172.31.6.149"
     ipv6:      ""
     ipv6gw:    ""
     ipv6start: ""
@@ -170,7 +180,7 @@ networks:
     ipv4:      "172.31.4.0/24"
     ipv4gw:    "172.31.4.1"
     ipv4start: "172.31.4.100"
-    ipv4end:   "172.31.4.199"
+    ipv4end:   "172.31.4.149"
     ipv6:      ""
     ipv6gw:    ""
     ipv6start: ""
@@ -185,7 +195,7 @@ networks:
     ipv4:      "172.31.2.0/24"
     ipv4gw:    "172.31.2.1"
     ipv4start: "172.31.2.100"
-    ipv4end:   "172.31.2.199"
+    ipv4end:   "172.31.2.149"
     ipv6:      ""
     ipv6gw:    ""
     ipv6start: ""
@@ -200,7 +210,22 @@ networks:
     ipv4:      "172.31.20.0/24"
     ipv4gw:    "172.31.20.1"
     ipv4start: "172.31.20.100"
-    ipv4end:   "172.31.20.199"
+    ipv4end:   "172.31.20.149"
+    ipv6:      ""
+    ipv6gw:    ""
+    ipv6start: ""
+    ipv6end:   ""
+    route:     ""
+    export:    ""
+    import:    ""
+    special:   ""
+  - uuid:      "5fcd11b0-1772-46b8-a97c-6e532fa2666d"
+    name:      "k8s"
+    external:  false
+    ipv4:      "172.31.30.0/24"
+    ipv4gw:    "172.31.30.1"
+    ipv4start: "172.31.30.100"
+    ipv4end:   "172.31.30.149"
     ipv6:      ""
     ipv6gw:    ""
     ipv6start: ""
@@ -215,7 +240,7 @@ networks:
     ipv4:      "172.31.1.0/24"
     ipv4gw:    "172.31.1.1"
     ipv4start: "172.31.1.100"
-    ipv4end:   "172.31.1.199"
+    ipv4end:   "172.31.1.149"
     ipv6:      ""
     ipv6gw:    ""
     ipv6start: ""
@@ -329,55 +354,38 @@ components:
     userdata:     []
 
   - uuid:         "306e3595-9fc0-4712-af0e-63b87cd1b9dc"
-    name:         "amf"
+    name:         "k8smaster"
     placement:    "INT"
-    flavor:       "none"
-    image:        "none"
+    flavor:       "5g_trial.32_64_50"
+    image:        "CentOS-7-x86_64"
     min:          1
     size:         1
     max:          1
     volumes:      []
     interfaces:
       - { network: "oam", attributes: "" }
-      - { network: "n1_n2", attributes: "" }
-      - { network: "int", attributes: "" }
-      - { network: "data", attributes: "" }
+      - { network: "k8s", attributes: "" }
     services:
       - { name: "ssh", network: "oam", protocol: "tcp", range: "22" }
     dependencies: []
     userdata:     []
 
   - uuid:         "d3dc6063-2195-42ac-bb66-9a925489d1a8"
-    name:         "smf"
+    name:         "k8sworker"
     placement:    "INT"
-    flavor:       "none"
-    image:        "none"
-    min:          1
-    size:         1
-    max:          1
+    flavor:       "5g_trial.32_64_50"
+    image:        "CentOS-7-x86_64"
+    min:          3
+    size:         3
+    max:          3
     volumes:      []
     interfaces:
-      - { network: "oam", attributes: "" }
-      - { network: "n4", attributes: "" }
-      - { network: "int", attributes: "" }
-      - { network: "data", attributes: "" }
-    services:
-      - { name: "ssh", network: "oam", protocol: "tcp", range: "22" }
-    dependencies: []
-    userdata:     []
-
-  - uuid:         "a253b75d-fcb2-45a7-9bb0-792d0dc6ac2d"
-    name:         "5gc"
-    placement:    "INT"
-    flavor:       "none"
-    image:        "none"
-    min:          1
-    size:         1
-    max:          1
-    volumes:      []
-    interfaces:
-      - { network: "oam", attributes: "" }
-      - { network: "int", attributes: "" }
+      - { network: "oam",   attributes: "" }
+      - { network: "k8s",   attributes: "" }
+      - { network: "int",   attributes: "allowed:172.31.2.151-180;" }
+      - { network: "data",  attributes: "" }
+      - { network: "n1_n2", attributes: "allowed:172.31.3.151-160;" }
+      - { network: "n4",    attributes: "allowed:172.31.4.161-170;" }
     services:
       - { name: "ssh", network: "oam", protocol: "tcp", range: "22" }
     dependencies: []
@@ -483,9 +491,8 @@ components:
       - { component: "test", service: "ssh", network: "oam" }
       - { component: "east", service: "ssh", network: "oam" }
       - { component: "upf", service: "ssh", network: "oam" }
-      - { component: "amf", service: "ssh", network: "oam" }
-      - { component: "smf", service: "ssh", network: "oam" }
-      - { component: "5gc", service: "ssh", network: "oam" }
+      - { component: "k8smaster", service: "ssh", network: "oam" }
+      - { component: "k8sworker", service: "ssh", network: "oam" }
       - { component: "nrf", service: "ssh", network: "oam" }
       - { component: "udm", service: "ssh", network: "oam" }
       - { component: "udr", service: "ssh", network: "oam" }

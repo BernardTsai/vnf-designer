@@ -9,7 +9,11 @@ function fixed_ips_filter(str) {
   var result  = []
 
   // extract the fixed ips part of the string
-  str1 = str.match(pattern) || ['']
+  str1 = str.match(pattern)
+
+  if ( !str1 ) {
+    return result
+  }
 
   // get first occurence
   str2 = str1[0]
@@ -46,7 +50,11 @@ function allowed_ips_filter(str) {
   var result  = []
 
   // extract the allowed ips part of the string
-  str1 = str.match(pattern) || ['']
+  str1 = str.match(pattern)
+
+  if ( !str1 ) {
+    return result
+  }
 
   // get first occurence
   str2 = str1[0]
@@ -140,4 +148,43 @@ function render(model, template_name) {
   env.addFilter('allowed', allowed_ips_filter )
 
   return nunjucks.renderString(tmpl, model);
+}
+
+// splitter splits up a txt along seperator lines
+// of the form "----- filename -----" and returns
+// a dictionary with the filenames as keys
+function splitter(txt) {
+  var result   = {}
+  var content  = ""
+  var lines    = txt.split("\n")
+  var filename = ""
+
+  // loop over all lines
+  for (const line of lines) {
+    seperator = line.match("----- .* -----")
+    if (seperator && seperator[0] == line) {
+      // store current content
+      if (filename != "" && content != "") {
+        result[filename] = content
+      }
+      // determine new filename
+      seperator = seperator[0]
+      filename = seperator.substring(6,seperator.length-6)
+      content  = ""
+    } else {
+      if (content != "") {
+        content += "\n" + line
+      } else {
+        content = line
+      }
+    }
+  }
+
+  // store remaining content
+  if (filename != "" && content != "") {
+    result[filename] = content
+  }
+
+  // completed
+  return result
 }
