@@ -390,7 +390,7 @@ templates['Servers (define security)'] = `{% for component in components %}{% if
     - {protocol: icmp, port_range_min: 0, port_range_max: 255, remote_ip_prefix: 0.0.0.0/0}
 {% for service in component.services %}{% if interface.network == service.network %}
 {% for network in networks %}{% if interface.network == network.name %}
-    - {protocol: {{service.protocol}}, port_range_min: {{service.range}}, port_range_max: {{service.range}}, remote_ip_prefix: {{network.ipv4}} }
+    - {protocol: {{service.protocol}}, port_range_min: {{service.range | portmin }}, port_range_max: {{service.range | portmax }}, remote_ip_prefix: {{network.ipv4}} }
 {% endif %}{% endfor %}
 {% endif %}{% endfor %}
 

@@ -35,6 +35,8 @@ Vue.component(
 
         env.addFilter('fixed',   fixed_ips_filter )
         env.addFilter('allowed', allowed_ips_filter )
+        env.addFilter('portmin', port_min_filter )
+        env.addFilter('portmax', port_max_filter )
 
         var result = nunjucks.renderString(tmpl, model);
 

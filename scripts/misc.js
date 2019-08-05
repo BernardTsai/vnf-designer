@@ -81,6 +81,24 @@ function allowed_ips_filter(str) {
   return result
 }
 
+// port_min_filter derives a min port number from a string
+// format: "portmin-portmax|port"
+// e.g. 8080-8081
+function port_min_filter(str) {
+  parts = str.split("-")
+
+  return (parts.length == 2 ? parts[0] : str )
+}
+
+// port_max_filter derives a max port number from a string
+// format: "portmin-portmax|port"
+// e.g. 8080-8081
+function port_max_filter(str) {
+  parts = str.split("-")
+
+  return (parts.length == 2 ? parts[1] : str )
+}
+
 // generate_ip_range generates a list of IP addresses as an array
 function generate_ip_range( range ) {
   var result = []
@@ -146,6 +164,8 @@ function render(model, template_name) {
 
   env.addFilter('fixed',   fixed_ips_filter )
   env.addFilter('allowed', allowed_ips_filter )
+  env.addFilter('portmin', port_min_filter )
+  env.addFilter('portmax', port_max_filter )
 
   return nunjucks.renderString(tmpl, model);
 }
