@@ -217,7 +217,7 @@ var schema = {
           "name": { "type": "string",
             "description": "Name of the virtual server" },
 
-          "placement": { "type": "string", "enum": ["OTHER", "EXT", "INT", "MGMT"],
+          "placement": { "type": "string", "enum": ["OTHER", "EXT", "INT", "MGMT", "ROUTER"],
             "description": "Placement of the virtual server" },
 
           "flavor": { "type": "string",

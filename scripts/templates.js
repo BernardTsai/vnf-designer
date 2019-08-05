@@ -176,7 +176,7 @@ templates['Networks (create)'] = `#!/usr/bin/env ansible-playbook
     - ../environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
-{% for network in networks %}{% if network.external == false %}
+{% for network in networks %}{% if network.external != "true" %}
   - name: Create {{network.name}} network
     os_network:
       state:          present
@@ -213,7 +213,7 @@ templates['Networks (delete)'] = `#!/usr/bin/env ansible-playbook
         name:           "{{ '{{item}}' }}_subnet"
         validate_certs: no
       loop:
-{% for network in networks %}{% if network.external == false %}
+{% for network in networks %}{% if network.external != "true" %}
       - {{network.name}}
 {% endif %}{% endfor %}
 
@@ -223,7 +223,7 @@ templates['Networks (delete)'] = `#!/usr/bin/env ansible-playbook
         name:           "{{ '{{item}}' }}"
         validate_certs: no
       loop:
-{% for network in networks %}{% if network.external == false %}
+{% for network in networks %}{% if network.external != "true" %}
       - {{network.name}}
 {% endif %}{% endfor %}`
 
