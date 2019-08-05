@@ -481,6 +481,15 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
       meta:
        hostname: {{component.name}}
 
+{% if component.name == "jumphost" %}
+   # ----- floating IP for jumphost -----
+   - name: Assign floating IP to jumphost
+     os_floating_ip:
+       state:               present
+       server:              jumphost
+       floating_ip_address: "{{env_vars.JUMPHOST}}"
+
+{% endif %}
 {% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
