@@ -18,10 +18,12 @@ tenant:
     network:     "{{tenant.service.network}}"
     cidr:        "{{tenant.service.cidr}}"
     gateway:     "{{tenant.service.gateway}}"
-  proxy:
-    address:     "{{tenant.proxy.address}}"
-    port:        "{{tenant.proxy.port}}"
+    proxy:       "{{tenant.service.proxy}}"
+    port:        "{{tenant.service.port}}"
   jumphost:      "{{tenant.jumphost}}"
+  proxy:
+    http:        "{{tenant.proxy.http}}"
+    https:       "{{tenant.proxy.https}}"
 flavors:
 {% for flavor in flavors %}
   - uuid:    "{{flavor.uuid}}"

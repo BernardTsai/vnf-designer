@@ -43,10 +43,20 @@ var schema = {
             "cidr":     { "type": "string", "description": "cidr of the service network" },
             "gateway":  { "type": "string", "description": "gateway ip address", "format": "ipv4"  },
             "proxy":    { "type": "string", "description": "proxy ip address", "format": "ipv4" },
-            "port":     { "type": "number", "description": "proxy port number" }
+            "port":     { "type": "string", "description": "proxy port number" }
           }
         },
-        "jumphost":     { "type": "string", "description": "jumphost ip address", "minLength": 1 }
+
+        "jumphost":     { "type": "string", "description": "jumphost ip address", "minLength": 1 },
+
+        "proxy": {
+          "description": "The parameters of the http proxy",
+          "type":        "object",
+          "properties": {
+            "http":     { "type": "string", "description": "url for http proxy" },
+            "https":    { "type": "string", "description": "url for https proxy" }
+          }
+        }
       }
     },
 
