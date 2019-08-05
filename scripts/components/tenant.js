@@ -457,6 +457,10 @@ Vue.component( 'tenantform',
         <input v-model="model.tenant.auth.password" id="tenant_auth_password" name="tenant_auth_password" required>
       </div>
       <div class="line">
+        <label for="tenant_auth_proxy">API Proxy:</label>
+        <input v-model="model.tenant.auth.proxy" id="tenant_auth_proxy" name="tenant_auth_proxy" required>
+      </div>
+      <div class="line">
         <label for="tenant_auth_url">URL:</label>
         <input v-model="model.tenant.auth.url" id="tenant_auth_url" name="tenant_auth_url" required>
       </div>
