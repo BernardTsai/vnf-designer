@@ -517,3 +517,61 @@ templates['Servers (delete)'] = `{% for component in components %}{% if componen
       validate_certs: no
 
 {% endif %}{% endif %}{% endfor %}`
+
+//------------------------------------------------------------------------------
+
+templates['Router (create)'] = `{% for component in components %}{% if component.placement == 'ROUTER' %}
+----- {{component.name}} -----
+#!/usr/bin/env ansible-playbook
+---
+- name: Create router {{component.name}}
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - ../../environment.yml
+  environment: "{{ '{{env_vars}}' }}"
+  tasks:
+
+  # ----- {{component.name}} router -----
+  - name: Create router {{component.name}}
+    os_router:
+      state:          present
+      name:           {{component.name}}
+      validate_certs: no
+      interface:
+{% for interface in component.interfaces %}
+      - subnet: {{interface.network}}_subnet
+{% endfor %}
+
+
+{% endif %}{% endfor %}`
+
+//------------------------------------------------------------------------------
+
+templates['Router (delete)'] = `{% for component in components %}{% if component.placement == 'ROUTER' %}
+----- {{component.name}} -----
+#!/usr/bin/env ansible-playbook
+---
+- name: Create router {{component.name}}
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - ../../environment.yml
+  environment: "{{ '{{env_vars}}' }}"
+  tasks:
+
+  # ----- {{component.name}} router -----
+  - name: Create router {{component.name}}
+    os_router:
+      state:          absent
+      name:           {{component.name}}
+      validate_certs: no
+      interface:
+{% for interface in component.interfaces %}
+      - subnet: {{interface.network}}_subnet
+{% endfor %}
+
+
+{% endif %}{% endfor %}`

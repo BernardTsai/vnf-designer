@@ -342,12 +342,17 @@ Vue.component( 'tenantform',
         var tenant   = zip.folder("tenant");
         var networks = zip.folder("networks");
         var servers  = zip.folder("servers");
+        var routers  = zip.folder("router");
 
         // construct a folder for each internal component
         var server_folders = {}
+        var router_folders = {}
         for (var c of model.components) {
           if (c.placement != "OTHER" && c.placement != "ROUTER" ) {
             server_folders[c.name] = servers.folder(c.name);
+          }
+          if (c.placement == "ROUTER" ) {
+            router_folders[c.name] = routers.folder(c.name);
           }
         }
 
@@ -412,6 +417,26 @@ Vue.component( 'tenantform',
         servers.file( "servers.tmpl",  files['servers.tmpl'])
         zip.file(     "ansible.cfg",   files['ansible.cfg'])
         zip.file(     "inventory",     files['inventory'])
+
+        // export router creation files
+        var txt  = render(model, "Router (create)")
+        var txts = splitter(txt)
+
+        for (var router in txts) {
+          var folder  = router_folders[router]
+          var content = txts[router]
+          folder.file("create.yml", content, {unixPermissions: "755"})
+        }
+
+        // export router deletion files
+        var txt  = render(model, "Router (delete)")
+        var txts = splitter(txt)
+
+        for (var router in txts) {
+          var folder  = router_folders[router]
+          var content = txts[router]
+          folder.file("delete.yml", content, {unixPermissions: "755"})
+        }
 
         // generate blob
         zip.generateAsync({type:"blob"})
