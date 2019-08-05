@@ -438,13 +438,16 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
     - ../../environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
+  - name: Set index
+    set_fact:
+      index: "{{ '-' + index | default('') }}"
 
 {% for interface in component.interfaces %}
-  # ----- {{interface.network}} port for {{component.name}} -----
-  - name: Create {{interface.network}} port for {{component.name}}
+  # ----- {{interface.network}} port for {{component.name}}{{ index }} -----
+  - name: Create {{interface.network}} port for {{component.name}}{{ index }}
     os_port:
       state:          present
-      name:           "{{component.name}}_{{interface.network}}"
+      name:           "{{component.name}}{{ index }}_{{interface.network}}"
       network:        "{{interface.network}}"
       validate_certs: no
       security_groups:
@@ -462,11 +465,11 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
 
 {% endfor %}
 
-  # ----- {{component.name}} virtual machine -----
-  - name: Create virtual machine for {{component.name}} server
+  # ----- {{component.name}}{{ index }} virtual machine -----
+  - name: Create virtual machine for {{component.name}}{{ index }} server
     os_server:
       state:          present
-      name:           {{component.name}}
+      name:           {{component.name}}{{ index }}
       flavor:         "{{component.flavor}}"
       image:          "{{component.image}}"
       key_name:       fiveg_key
@@ -476,10 +479,10 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
       validate_certs: no
       nics:
 {% for interface in component.interfaces %}
-        - port-name: {{component.name}}_{{interface.network}}
+        - port-name: {{component.name}}{{ index }}_{{interface.network}}
 {% endfor %}
       meta:
-       hostname: {{component.name}}
+       hostname: {{component.name}}{{ index }}
 
 {% if component.name == "jumphost" %}
    # ----- floating IP for jumphost -----
@@ -506,23 +509,26 @@ templates['Servers (delete)'] = `{% for component in components %}{% if componen
     - ../../environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
+  - name: Set index
+    set_fact:
+      index: "{{ '-' + index | default('') }}"
 
 {% for interface in component.interfaces %}
-  # ----- {{interface.network}} port for {{component.name}} -----
-  - name: Create {{interface.network}} port for {{component.name}}
+  # ----- {{interface.network}} port for {{component.name}{{ index }}} -----
+  - name: Delete {{interface.network}} port for {{component.name}}{{ index }}
     os_port:
       state:          absent
-      name:           "{{component.name}}_{{interface.network}}"
+      name:           "{{component.name}}{{ index }}_{{interface.network}}"
       network:        "{{interface.network}}"
       validate_certs: no
 
 {% endfor %}
 
-  # ----- {{component.name}} virtual machine -----
-  - name: Create virtual machine for {{component.name}} server
+  # ----- {{component.name}}{{ index }} virtual machine -----
+  - name: Delete virtual machine for {{component.name}}{{ index }} server
     os_server:
       state:          absent
-      name:           {{component.name}}
+      name:           {{component.name}}{{ index }}
       validate_certs: no
 
 {% endif %}{% endif %}{% endfor %}`
