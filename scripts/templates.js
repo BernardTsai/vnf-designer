@@ -284,7 +284,7 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
     - name: Define servers
       set_fact:
         server_names:
-{% for component in components %}{% if component.placement != 'OTHER' && component.placement != 'ROUTER' %}
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 {% if component.max == 1 %}
           - {{component.name}}
 {% else %}
@@ -292,12 +292,12 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
           - {{component.name}}{{server_index}}
 {% endfor %}
 {% endif %}
-{% endif %}{% endfor %}
+{% endif %}{% endif %}{% endfor %}
 
     - name: Define ports
       set_fact:
         port_names:
-{% for component in components %}{% if component.placement != 'OTHER' && component.placement != 'ROUTER' %}
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 {% for interface in component.interfaces %}
 {% if component.max == 1 %}
           - {{component.name}}_{{interface.network}}
@@ -307,7 +307,7 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
 {% endfor %}
 {% endif %}
 {% endfor %}
-{% endif %}{% endfor %}
+{% endif %}{% endif %}{% endfor %}
 
     - name: Collect server information
       os_server_facts:
@@ -336,7 +336,7 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
 
 //------------------------------------------------------------------------------
 
-templates['Servers (define security)'] = `{% for component in components %}{% if component.placement != 'OTHER' && component.placement != 'ROUTER' %}
+templates['Servers (define security)'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 ----- {{component.name}} -----
 #!/usr/bin/env ansible-playbook
 ---
@@ -393,11 +393,11 @@ templates['Servers (define security)'] = `{% for component in components %}{% if
 {% endif %}{% endfor %}
 
 {% endfor %}
-{% endif %}{% endfor %}`
+{% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
 
-templates['Servers (undefine security)'] = `{% for component in components %}{% if component.placement != 'OTHER' && component.placement != 'ROUTER' %}
+templates['Servers (undefine security)'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 ----- {{component.name}} -----
 #!/usr/bin/env ansible-playbook
 ---
@@ -420,11 +420,11 @@ templates['Servers (undefine security)'] = `{% for component in components %}{% 
       validate_certs: no
 
 {% endfor %}
-{% endif %}{% endfor %}`
+{% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
 
-templates['Servers (create)'] = `{% for component in components %}{% if component.placement != 'OTHER' && component.placement != 'ROUTER' %}
+templates['Servers (create)'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 ----- {{component.name}} -----
 #!/usr/bin/env ansible-playbook
 ---
@@ -479,11 +479,11 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
       meta:
        hostname: {{component.name}}
 
-{% endif %}{% endfor %}`
+{% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
 
-templates['Servers (delete)'] = `{% for component in components %}{% if component.placement != 'OTHER' && component.placement != 'ROUTER' %}
+templates['Servers (delete)'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 ----- {{component.name}} -----
 #!/usr/bin/env ansible-playbook
 ---
@@ -514,4 +514,4 @@ templates['Servers (delete)'] = `{% for component in components %}{% if componen
       name:           {{component.name}}
       validate_certs: no
 
-{% endif %}{% endfor %}`
+{% endif %}{% endif %}{% endfor %}`
