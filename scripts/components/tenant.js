@@ -376,6 +376,18 @@ Vue.component( 'tenantform',
         var txt = render(model, "Servers (status)")
         servers.file("status.yml", txt, {unixPermissions: "755"})
 
+        // export servers define security all file
+        var txt = render(model, "Servers (define security all)")
+        servers.file("define_security.yml", txt, {unixPermissions: "755"})
+
+        // export servers undefine security all file
+        var txt = render(model, "Servers (define security all)")
+        servers.file("undefine_security.yml", txt, {unixPermissions: "755"})
+
+        // export servers create all file
+        var txt = render(model, "Servers (create all)")
+        servers.file("create.yml", txt, {unixPermissions: "755"})
+
         // export server security definition files
         var txt  = render(model, "Servers (define security)")
         var txts = splitter(txt)

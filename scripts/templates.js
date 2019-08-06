@@ -415,7 +415,7 @@ templates['Servers (undefine security)'] = `{% for component in components %}{% 
 
 {% for interface in component.interfaces %}
   # ----- security group for {{component.name}} interface {{interface.network}} -----
-  - name: Create {{component.name}}_{{interface.network}} security group
+  - name: Delete {{component.name}}_{{interface.network}} security group
     os_security_group:
       state:          absent
       name:           {{component.name}}_{{interface.network}}
@@ -423,6 +423,33 @@ templates['Servers (undefine security)'] = `{% for component in components %}{% 
       validate_certs: no
 
 {% endfor %}
+{% endif %}{% endif %}{% endfor %}`
+
+//------------------------------------------------------------------------------
+
+templates['Servers (define security all)'] = `#!/usr/bin/env ansible-playbook
+---
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
+- name: Create {{component.name}}
+  import_tasks: {{component.name}}/define_security.yaml
+{% endif %}{% endif %}{% endfor %}`
+
+//------------------------------------------------------------------------------
+
+templates['Servers (undefine security all)'] = `#!/usr/bin/env ansible-playbook
+---
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
+- name: Create {{component.name}}
+  import_tasks: {{component.name}}/undefine_security.yaml
+{% endif %}{% endif %}{% endfor %}`
+
+//------------------------------------------------------------------------------
+
+templates['Servers (create all)'] = `#!/usr/bin/env ansible-playbook
+---
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
+- name: Create {{component.name}}
+  import_tasks: {{component.name}}/create.yaml
 {% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
@@ -445,11 +472,11 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
 
   - name: Set index II/II
     set_fact:
-      index: "{{ '{{' }} (idx == '') | ternary( '' : '-' + idx) {{ '}}' }}"
+      index: "{{ '{{' }} (idx == '') | ternary( '', '-' + idx) {{ '}}' }}"
 
 {% for interface in component.interfaces %}
   # ----- {{interface.network}} port for {{component.name}} -----
-  - name: Create {{interface.network}} port for {{component.name}}{
+  - name: Create {{interface.network}} port for {{component.name}}
     os_port:
       state:          present
       name:           "{{component.name}}{{ '{{ index }}' }}_{{interface.network}}"
@@ -520,7 +547,7 @@ templates['Servers (delete)'] = `{% for component in components %}{% if componen
 
   - name: Set index II/II
     set_fact:
-      index: "{{ '{{' }} (idx == '') | ternary( '' : '-' + idx) {{ '}}' }}"
+      index: "{{ '{{' }} (idx == '') | ternary( '', '-' + idx) {{ '}}' }}"
 
 {% for interface in component.interfaces %}
   # ----- {{interface.network}} port for {{component.name}} -----
