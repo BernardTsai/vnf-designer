@@ -50,6 +50,7 @@ networks:
 {% for network in networks%}
   - uuid:      "{{network.uuid}}"
     name:      "{{network.name}}"
+    external:  "{{network.external}}"
     ipv4:      "{{network.ipv4}}"
     ipv4gw:    "{{network.ipv4gw}}"
     ipv4start: "{{network.ipv4start}}"
@@ -438,16 +439,20 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
     - ../../environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
-  - name: Set index
+  - name: Set index I/II
     set_fact:
-      index: "{{ '-' + index | default('') }}"
+      idx: "{{ '{{' }} nr | default ('') {{ '}}' }}"
+
+  - name: Set index II/II
+    set_fact:
+      index: "{{ '{{' }} (idx == '') | ternary( '' : '-' + idx) {{ '}}' }}"
 
 {% for interface in component.interfaces %}
-  # ----- {{interface.network}} port for {{component.name}}{{ index }} -----
-  - name: Create {{interface.network}} port for {{component.name}}{{ index }}
+  # ----- {{interface.network}} port for {{component.name}} -----
+  - name: Create {{interface.network}} port for {{component.name}}{
     os_port:
       state:          present
-      name:           "{{component.name}}{{ index }}_{{interface.network}}"
+      name:           "{{component.name}}{{ '{{ index }}' }}_{{interface.network}}"
       network:        "{{interface.network}}"
       validate_certs: no
       security_groups:
@@ -465,11 +470,11 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
 
 {% endfor %}
 
-  # ----- {{component.name}}{{ index }} virtual machine -----
-  - name: Create virtual machine for {{component.name}}{{ index }} server
+  # ----- {{component.name}} virtual machine -----
+  - name: Create virtual machine for {{component.name}} server
     os_server:
       state:          present
-      name:           {{component.name}}{{ index }}
+      name:           {{component.name}}{{ '{{ index }}' }}
       flavor:         "{{component.flavor}}"
       image:          "{{component.image}}"
       key_name:       fiveg_key
@@ -479,10 +484,10 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
       validate_certs: no
       nics:
 {% for interface in component.interfaces %}
-        - port-name: {{component.name}}{{ index }}_{{interface.network}}
+        - port-name: {{component.name}}{{ '{{ index }}' }}_{{interface.network}}
 {% endfor %}
       meta:
-       hostname: {{component.name}}{{ index }}
+       hostname: {{component.name}}{{ '{{ index }}' }}
 
 {% if component.name == "jumphost" %}
    # ----- floating IP for jumphost -----
@@ -509,26 +514,30 @@ templates['Servers (delete)'] = `{% for component in components %}{% if componen
     - ../../environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
-  - name: Set index
+  - name: Set index I/II
     set_fact:
-      index: "{{ '-' + index | default('') }}"
+      idx: "{{ '{{' }} nr | default ('') {{ '}}' }}"
+
+  - name: Set index II/II
+    set_fact:
+      index: "{{ '{{' }} (idx == '') | ternary( '' : '-' + idx) {{ '}}' }}"
 
 {% for interface in component.interfaces %}
-  # ----- {{interface.network}} port for {{component.name}{{ index }}} -----
-  - name: Delete {{interface.network}} port for {{component.name}}{{ index }}
+  # ----- {{interface.network}} port for {{component.name}} -----
+  - name: Delete {{interface.network}} port for {{component.name}}
     os_port:
       state:          absent
-      name:           "{{component.name}}{{ index }}_{{interface.network}}"
+      name:           "{{component.name}}{{ '{{ index }}' }}_{{interface.network}}"
       network:        "{{interface.network}}"
       validate_certs: no
 
 {% endfor %}
 
-  # ----- {{component.name}}{{ index }} virtual machine -----
-  - name: Delete virtual machine for {{component.name}}{{ index }} server
+  # ----- {{component.name}} virtual machine -----
+  - name: Delete virtual machine for {{component.name}} server
     os_server:
       state:          absent
-      name:           {{component.name}}{{ index }}
+      name:           {{component.name}}{{ '{{ index }}' }}
       validate_certs: no
 
 {% endif %}{% endif %}{% endfor %}`

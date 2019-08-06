@@ -128,6 +128,9 @@ Vue.component( 'tenant_interface',
         }
 
         return 0
+      },
+      a: function() {
+        return this.interface.network + (this.interface.attributes != "" ? ": " + this.interface.attributes : "")
       }
     },
     template: `
@@ -138,7 +141,8 @@ Vue.component( 'tenant_interface',
           left:   l + 'px',
           width:  w + 'px',
           height: h + 'px',
-        }">
+        }"
+        v-bind:title="a">
         <div class="serverport"></div>
         <div class="switchport"></div>
       </div>`
