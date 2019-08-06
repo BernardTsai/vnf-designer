@@ -343,10 +343,12 @@ Vue.component( 'tenantform',
         zip.file("environment.yml", txt)
 
         // construct folders
-        var tenant   = zip.folder("tenant");
-        var networks = zip.folder("networks");
-        var servers  = zip.folder("servers");
-        var routers  = zip.folder("router");
+        var tenant    = zip.folder("tenant");
+        var networks  = zip.folder("networks");
+        var servers   = zip.folder("servers");
+        var routers   = zip.folder("router");
+        var templates = zip.folder("templates");
+        var output    = zip.folder("output");
 
         // construct a folder for each internal component
         var server_folders = {}
@@ -429,10 +431,14 @@ Vue.component( 'tenantform',
         }
 
         // export networks and servers template file
-        networks.file("networks.tmpl", files['networks.tmpl'])
-        servers.file( "servers.tmpl",  files['servers.tmpl'])
-        zip.file(     "ansible.cfg",   files['ansible.cfg'])
-        zip.file(     "inventory",     files['inventory'])
+        // export ansible cfg file
+        servers.file(   "ssh.yml",        files['ssh.yml'], {unixPermissions: "755"})
+        zip.file(       "ansible.cfg",    files['ansible.cfg'])
+        templates.file( "networks.tmpl",  files['networks.tmpl'])
+        templates.file( "servers.tmpl",   files['servers.tmpl'])
+        templates.file( "config",         files['config'])
+        templates.file( "inventory",      files['inventory'])
+        output.file(    "inventory",      files['default_inventory'])
 
         // export router creation files
         var txt  = render(model, "Router (create)")

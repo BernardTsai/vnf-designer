@@ -173,6 +173,8 @@ templates['Networks (create)'] = `#!/usr/bin/env ansible-playbook
   hosts: localhost
   connection: local
   gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
     - ../environment.yml
   environment: "{{ '{{env_vars}}' }}"
@@ -204,6 +206,8 @@ templates['Networks (delete)'] = `#!/usr/bin/env ansible-playbook
   hosts:        localhost
   connection:   local
   gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
     - ../environment.yml
   environment: "{{ '{{env_vars}}' }}"
@@ -236,6 +240,8 @@ templates['Networks (status)'] = `#!/usr/bin/env ansible-playbook
   hosts:        localhost
   connection:   local
   gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
     - ../environment.yml
   environment: "{{ '{{env_vars}}' }}"
@@ -267,7 +273,7 @@ templates['Networks (status)'] = `#!/usr/bin/env ansible-playbook
 
     - name: Create report 'networks.yml'
       template:
-        src:  networks.tmpl
+        src:  ../templates/networks.tmpl
         dest: ../output/networks.yml
       delegate_to:  localhost
       changed_when: false`
@@ -280,10 +286,16 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
   hosts:        localhost
   connection:   local
   gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
     - ../environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
+    - name: Define jumphost
+      set_fact:
+        jumphost: {{tenant.jumphost}}
+
     - name: Define servers
       set_fact:
         server_names:
@@ -292,7 +304,7 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
           - {{component.name}}
 {% else %}
 {% for server_index in range(1,1+component.max,1) %}
-          - {{component.name}}{{server_index}}
+          - {{component.name}}-{{server_index}}
 {% endfor %}
 {% endif %}
 {% endif %}{% endif %}{% endfor %}
@@ -306,7 +318,7 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
           - {{component.name}}_{{interface.network}}
 {% else %}
 {% for server_index in range(1,component.max,1) %}
-          - {{component.name}}{{server_index}}_{{interface.network}}
+          - {{component.name}}-{{server_index}}_{{interface.network}}
 {% endfor %}
 {% endif %}
 {% endfor %}
@@ -332,8 +344,22 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
 
     - name: Create report 'servers.yml'
       template:
-        src:  servers.tmpl
+        src:  ../templates/servers.tmpl
         dest: ../output/servers.yml
+      delegate_to:  localhost
+      changed_when: false
+
+    - name: Create ansible ssh config
+      template:
+        src:  ../templates/config
+        dest: ../output/config
+      delegate_to:  localhost
+      changed_when: false
+
+    - name: Create ansible inventory
+      template:
+        src:  ../templates/inventory
+        dest: ../output/inventory
       delegate_to:  localhost
       changed_when: false`
 
@@ -347,6 +373,8 @@ templates['Servers (define security)'] = `{% for component in components %}{% if
   hosts: localhost
   connection: local
   gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
     - ../../environment.yml
   environment: "{{ '{{env_vars}}' }}"
@@ -408,6 +436,8 @@ templates['Servers (undefine security)'] = `{% for component in components %}{% 
   hosts: localhost
   connection: local
   gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
     - ../../environment.yml
   environment: "{{ '{{env_vars}}' }}"
@@ -462,6 +492,8 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
   hosts: localhost
   connection: local
   gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
     - ../../environment.yml
   environment: "{{ '{{env_vars}}' }}"
@@ -537,6 +569,8 @@ templates['Servers (delete)'] = `{% for component in components %}{% if componen
   hosts: localhost
   connection: local
   gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
     - ../../environment.yml
   environment: "{{ '{{env_vars}}' }}"
@@ -579,6 +613,8 @@ templates['Router (create)'] = `{% for component in components %}{% if component
   hosts: localhost
   connection: local
   gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
     - ../../environment.yml
   environment: "{{ '{{env_vars}}' }}"
@@ -608,6 +644,8 @@ templates['Router (delete)'] = `{% for component in components %}{% if component
   hosts: localhost
   connection: local
   gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
     - ../../environment.yml
   environment: "{{ '{{env_vars}}' }}"

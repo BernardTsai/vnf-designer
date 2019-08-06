@@ -42,14 +42,14 @@ servers:
 {% set n.port_found = false %}
       {{ port_name | replace(server_name + "_","") }}:
 {% for port in ports.ansible_facts.openstack_ports %}{% if port.name == port_name %}{% set n.port_found = true %}
-        - status:    "defined"
-        - fixed:     "{{ port.fixed_ips | map(attribute='ip_address') | join(', ') }}"
-        - allowed:   "{{ port.allowed_address_pairs | map(attribute='ip_address') | join(', ') }}"
+        status:    "defined"
+        fixed:     "{{ port.fixed_ips | map(attribute='ip_address') | join(', ') }}"
+        allowed:   "{{ port.allowed_address_pairs | map(attribute='ip_address') | join(', ') }}"
 {% endif %}{% endfor %}
 {% if n.port_found == false %}
-        - status:  "unknown"
-        - fixed:   ""
-        - allowed: ""
+        status:  "unknown"
+        fixed:   ""
+        allowed: ""
 {% endif %}
 {% endif %}{% endfor %}
 {% endfor %}
@@ -59,19 +59,61 @@ servers:
 
 files['ansible.cfg'] = `
 [defaults]
-inventory       = inventory
-stdout_callback = yaml`
+inventory       = ./output/inventory
+stdout_callback = yaml
+
+[ssh_connection]
+ssh_args     = -F ./output/config
+control_path = ./mux-%r@%h:%p`
 
 //------------------------------------------------------------------------------
 
-files['inventory'] = `
-[kubernetes]
-k8smaster
-k8sworker1
-k8sworker2
-k8sworker3
+files['config'] = `
+Host jumphost
+  User         "ubuntu"
+  HostName     "{{ jumphost }}"
 
-[workers]
-k8sworker1
-k8sworker2
-k8sworker3`
+{% for server_name in server_names %}{% if server_name != "jumphost" %}
+{% for port in ports.ansible_facts.openstack_ports %}{% if port.name == (server_name + '_oam') %}
+Host {{server_name}}
+  User         "centos"
+  ProxyCommand ssh -i ./files/id_rsa ubuntu@{{ jumphost }} -W %h:%p
+  HostName     {{ port.fixed_ips | map(attribute='ip_address') | join(', ') }}
+
+{% endif %}{% endfor %}
+{% endif %}{% endfor %}
+
+Host *
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null
+  IdentityFile ./id_rsa`
+
+//------------------------------------------------------------------------------
+
+files['inventory'] = `localhost ansible_connection=local
+
+[servers]
+{% for server_name in server_names %}{% if server_name != "jumphost" %}
+{{server_name}}
+{% endif %}{% endfor %}`
+
+//------------------------------------------------------------------------------
+
+files['default_inventory'] = `localhost ansible_connection=local `
+
+//------------------------------------------------------------------------------
+
+files['ssh.yml'] = `#!/usr/bin/env ansible-playbook
+---
+- name: Update ssh keys
+  hosts: servers
+  gather_facts: false
+  tasks:
+    - name: Update authorized keys file
+      authorized_key:
+        user: root
+        key: '{{ item }}'
+        state: present
+        exclusive: True
+      with_file:
+        - ../authorized_keys`
