@@ -1,6 +1,7 @@
 var templates = {}
 
 templates['Canonical'] = `---
+schema:     {{schema}}
 vnf:        {{vnf}}
 version:    {{version}}
 tenant:

@@ -5,6 +5,7 @@ var model   = current;
 //------------------------------------------------------------------------------
 
 function setModel(object) {
+  model.schema     = "1.0.0"
   model.vnf        = object.vnf
   model.version    = object.version
   model.tenant     = object.tenant

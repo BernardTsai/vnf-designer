@@ -3,8 +3,11 @@ var schema = {
   "title":       "VNF Desciptor",
   "description": "A simple VNF descriptor",
   "type":        "object",
-  "required":    ["vnf", "tenant", "version", "flavors", "images", "networks", "components"],
+  "required":    ["schema", "vnf", "version", "tenant", "flavors", "images", "networks", "components"],
   "properties": {
+
+    "schema": { "type": "string", "enum": ['1.0.0'],
+      "description": "The version of the schema" },
 
     "vnf": { "type": "string", "minLength": 1,
       "description": "The unique identifier for a virtual network function" },

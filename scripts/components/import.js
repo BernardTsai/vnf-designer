@@ -56,14 +56,7 @@ Vue.component(
         }
 
         // copy data to model
-        model.vnf        = object.vnf
-        model.tenant     = object.tenant
-        model.version    = object.version
-        model.datacenter = object.datacenter
-        model.flavors    = object.flavors
-        model.images     = object.images
-        model.networks   = object.networks
-        model.components = object.components
+        setModel(object)
 
         // set focus to tenant
         setContext("Tenant")

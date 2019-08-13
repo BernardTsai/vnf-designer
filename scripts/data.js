@@ -1,5 +1,6 @@
 var data = `
 ---
+schema:     "1.0.0"
 vnf:        5G-Core
 version:    1.0.0
 tenant:
