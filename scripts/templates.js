@@ -462,7 +462,7 @@ templates['Servers (define security all)'] = `#!/usr/bin/env ansible-playbook
 ---
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 - name: Create {{component.name}}
-  import_tasks: {{component.name}}/define_security.yaml
+  import_playbook: {{component.name}}/define_security.yml
 {% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
@@ -471,7 +471,7 @@ templates['Servers (undefine security all)'] = `#!/usr/bin/env ansible-playbook
 ---
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 - name: Create {{component.name}}
-  import_tasks: {{component.name}}/undefine_security.yaml
+  import_playbook: {{component.name}}/undefine_security.yml
 {% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
@@ -479,8 +479,63 @@ templates['Servers (undefine security all)'] = `#!/usr/bin/env ansible-playbook
 templates['Servers (create all)'] = `#!/usr/bin/env ansible-playbook
 ---
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
+{% if component.max == 1 %}
+- name: Unset nr
+  hosts:        localhost
+  connection:   local
+  gather_facts: false
+  tasks:
+  - name: Set nr = ""
+    set_fact:
+      nr: ""
 - name: Create {{component.name}}
-  import_tasks: {{component.name}}/create.yaml
+  import_playbook: {{component.name}}/create.yml
+{% else %}
+{% for index in range(component.max) %}
+- name: Set nr {{index+1}}
+  hosts:        localhost
+  connection:   local
+  gather_facts: false
+  tasks:
+  - name: Set nr = {{index+1}}
+    set_fact:
+      nr: {{index+1}}
+- name: Create {{component.name}} {{index+1}}
+  import_playbook: {{component.name}}/create.yml
+{% endfor %}
+{% endif %}
+{% endif %}{% endif %}{% endfor %}`
+
+//------------------------------------------------------------------------------
+
+templates['Servers (delete all)'] = `#!/usr/bin/env ansible-playbook
+---
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
+{% if component.max == 1 %}
+- name: Unset nr
+  hosts:        localhost
+  connection:   local
+  gather_facts: false
+  tasks:
+  - name: Set nr = ""
+    set_fact:
+      nr: ""
+- name: Create {{component.name}}
+  import_tasks: {{component.name}}/delete.yml
+{% else %}
+{% for index in range(component.max) %}
+- name: Set nr {{index+1}}
+  hosts:        localhost
+  connection:   local
+  gather_facts: false
+  tasks:
+  - name: Set nr = {{index+1}}
+    set_fact:
+      nr: {{index+1}}
+- name: Delete {{component.name}} {{index+1}}
+  import_playbook: {{component.name}}/delete.yml
+{% endfor %}
+{% endif %}
 {% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
@@ -549,7 +604,7 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
       meta:
        hostname: {{component.name}}{{ '{{ index }}' }}
 
-{% if component.name == "jumphost" %}
+{% if component.name == "jumphost" %}{% if tenant.jumphost != "" %}
    # ----- floating IP for jumphost -----
    - name: Assign floating IP to jumphost
      os_floating_ip:
@@ -557,7 +612,7 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
        server:              jumphost
        floating_ip_address: "{{env_vars.JUMPHOST}}"
 
-{% endif %}
+{% endif %}{% endif %}
 {% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------

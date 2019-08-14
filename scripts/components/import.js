@@ -45,6 +45,7 @@ Vue.component(
         msg = validate_schema(object);
         if (msg != '') {
           view.modal = msg
+          setContext("Import")
           return
         }
 
@@ -52,6 +53,7 @@ Vue.component(
         msg = validate_xref(object);
         if (msg != '') {
           view.modal = msg
+          setContext("Import")
           return
         }
 

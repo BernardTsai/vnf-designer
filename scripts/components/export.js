@@ -9,9 +9,9 @@ Vue.component(
         document.execCommand("Copy");
       },
       download: function() {
-        var text     = document.getElementById("export").value;
-        var element  = document.createElement('a');
-        var filename = "vnf-descriptor.txt";
+        var text     = document.getElementById("export").value
+        var element  = document.createElement('a')
+        var filename = "descriptor.txt"
 
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
         element.setAttribute('download', filename);
@@ -85,6 +85,10 @@ Vue.component(
         // export servers create all file
         var txt = render(model, "Servers (create all)")
         servers.file("create.yml", txt, {unixPermissions: "755"})
+
+        // export servers delete all file
+        var txt = render(model, "Servers (delete all)")
+        servers.file("delete.yml", txt, {unixPermissions: "755"})
 
         // export server security definition files
         var txt  = render(model, "Servers (define security)")

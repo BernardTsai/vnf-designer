@@ -172,16 +172,16 @@ Vue.component(
           <label v-on:click="delVolume(volume)"><i class="fas fa-minus-circle"/></label>
         </div>
 
-        <div v-if="component.placement != 'OTHER'" class="subheader">Interfaces:</div>
+        <div class="subheader">Interfaces:</div>
 
-        <div class="line" v-if="component.placement != 'OTHER'">
+        <div class="line">
           <label class="top">Network:</label>
           <label class="top">Attributes:</label>
           <label class="top"></label>
           <label class="top"></label>
           <label v-on:click="addInterface()"><i class="fas fa-plus-circle"/></label>
         </div>
-        <div class="line" v-for="(interface,index) in component.interfaces" v-if="component.placement != 'OTHER'">
+        <div class="line" v-for="(interface,index) in component.interfaces">
           <select v-bind:id="'interfaces_' + index + '_network'" v-bind:name="'interfaces_' + index + '_network'" v-model="interface.network" v-bind:class="{valid: all_networks.includes(interface.network)}" required>
             <option disabled value="">Please select one</option>
             <option v-for="network in all_networks" v-bind:value="network">

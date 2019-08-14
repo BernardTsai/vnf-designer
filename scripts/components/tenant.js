@@ -52,7 +52,7 @@ Vue.component( 'tenant_network',
           height:      h + 'px'
         }"
         v-on:click.alt="viewNetwork"
-        v-bind:title="'ipv4: ' + network.ipv4 + '\\nipv6: ' + network.ipv6">
+        v-bind:title="network.name + '\\nipv4: ' + network.ipv4 + '\\nipv6: ' + network.ipv6">
         <input v-model="network.name" v-on:change="handleChange">
       </div>`
   }
@@ -399,7 +399,7 @@ Vue.component( 'tenantform',
       <hr/>
       <div class="line">
         <label for="tenant_jumphost">Jumphost:</label>
-        <input v-model="model.tenant.jumphost" id="tenant_jumphost" name="tenant_jumphost" required>
+        <input v-model="model.tenant.jumphost" id="tenant_jumphost" name="tenant_jumphost">
       </div>
       <hr/>
       <div class="line">

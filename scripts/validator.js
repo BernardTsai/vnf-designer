@@ -18,7 +18,7 @@ var schema = {
     "tenant": {
       "description": "The tenant information",
       "type":        "object",
-      "required":    ["auth","service","jumphost"],
+      "required":    ["auth","service"],
       "properties": {
 
         "auth": {
@@ -50,7 +50,7 @@ var schema = {
           }
         },
 
-        "jumphost":     { "type": "string", "description": "jumphost ip address", "minLength": 1 },
+        "jumphost":     { "type": "string", "description": "jumphost ip address" },
 
         "proxy": {
           "description": "The parameters of the http proxy",
