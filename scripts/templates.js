@@ -613,6 +613,26 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
        floating_ip_address: "{{env_vars.JUMPHOST}}"
 
 {% endif %}{% endif %}
+
+{% for volume in component.volumes %}
+  # ----- {{volume.name}} volume for {{component.name}} -----
+  - name: Create {{volume.name}} volume for {{component.name}}
+    os_volume:
+      state:          present
+      name:           "{{component.name}}{{ '{{ index }}' }}_{{volume.name}}"
+      size:           {{volume.size}}
+      display_name:   "{volume.name}} volume for {{component.name}}"
+      validate_certs: no
+
+  - name: Attach volume {{volume.name}} to {{component.name}}
+    os_server_volume:
+      state:          present
+      server:         "{{component.name}}{{ '{{ index }}' }}"
+      volume:         "{{component.name}}{{ '{{ index }}' }}_{{volume.name}}"
+      validate_certs: no
+
+{% endfor %}
+
 {% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
@@ -646,6 +666,23 @@ templates['Servers (delete)'] = `{% for component in components %}{% if componen
       state:          absent
       name:           "{{component.name}}{{ '{{ index }}' }}_{{interface.network}}"
       network:        "{{interface.network}}"
+      validate_certs: no
+
+{% endfor %}
+
+{% for volume in component.volumes %}
+  # ----- {{volume.name}} volume for {{component.name}} -----
+  - name: Detach volume {{volume.name}} to {{component.name}}
+    os_server_volume:
+      state:          absent
+      server:         "{{component.name}}{{ '{{ index }}' }}"
+      volume:         "{{component.name}}{{ '{{ index }}' }}_{{volume.name}}"
+      validate_certs: no
+
+  - name: Create {{volume.name}} volume for {{component.name}}
+    os_volume:
+      state:          absent
+      name:           "{{component.name}}{{ '{{ index }}' }}_{{volume.name}}"
       validate_certs: no
 
 {% endfor %}
