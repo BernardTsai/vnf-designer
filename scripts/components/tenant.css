@@ -94,8 +94,22 @@
 
 #tenant_layout .network input, #tenant_layout .network .label {
   position:         absolute;
-  left:             -20px;
+  left:             -28px;
   top:              -16px;
+  width:            52px;
+  background-color: transparent;
+  border:           none;
+  line-height:      12px;
+  text-align:       center;
+  overflow:         hidden;
+  text-overflow:    ellipsis;
+  white-space:      nowrap;
+}
+
+#tenant_layout .network .icon {
+  position:         absolute;
+  left:             -20px;
+  top:              -32px;
   width:            40px;
   background-color: transparent;
   border:           none;
@@ -220,7 +234,7 @@
   background-color: inherit;
   border: none;
   font-size:        14px;
-  width:            160px;
+  width:            140px;
   text-overflow:    ellipsis;
 }
 
@@ -241,6 +255,16 @@
   padding-left:     4px;
   padding-right:    4px;
   font-size:        12px;
+}
+
+#tenant_layout .component .icon {
+  position:         absolute;
+  right:            4px;
+  top:              0px;
+  height:          32px;
+  line-height:     32px;
+  font-size:       16px;
+  vertical-align:    middle;
 }
 
 /*----------------------------------------------------------------------------*/

@@ -18,7 +18,7 @@ body {
      -khtml-user-select: none; /* Konqueror HTML */
        -moz-user-select: none; /* Firefox */
         -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently */
+         /* user-select: none; /* Non-prefixed version, currently */
 }
 
 div, input, select, textarea {
@@ -28,7 +28,7 @@ div, input, select, textarea {
 input, select {
   -webkit-appearance: none;
   -moz-appearance: none;
-  appearance: none;
+  /* appearance: none; */
   border-radius: 0px;
 }
 
@@ -224,14 +224,15 @@ textare:focus, select:focus, input:focus {
 /*----------------------------------------------------------------------------*/
 
 #appdetail {
-  position:    absolute;
-  left:        320px;
-  right:       0px;
-  bottom:      0px;
-  top:         56px;
-  overflow-y: scroll;
-  min-height:  544px;
-  min-width:   704px;
+  position:          absolute;
+  left:              320px;
+  right:             0px;
+  bottom:            0px;
+  top:               56px;
+  overflow-y:        scroll;
+  min-height:        544px;
+  min-width:         704px;
+  background-color:  white;
 }
 
 /*----------------------------------------------------------------------------*/

@@ -1,23 +1,70 @@
 Vue.component( 'appheader',
   {
     props:    ['model','view'],
+    computed: {
+      title: function() {
+        switch(view.detail) {
+          case "Monitoring":
+            return "Monitoring: " + this.model.vnf + " (" + this.model.version + ")"
+          case "Delta":
+            return "Comparison: " + current.vnf + " (" + current.version + ")" +
+                   " versus "     + target.vnf  + " (" + target.version  + ")"
+        }
+
+        return (view.mode === 'current' ? "Current state: " : "Target state: ") +
+               this.model.vnf + " (" + this.model.version + ")"
+      }
+    },
     methods: {
       context: function(ctxt) {
         setContext(ctxt)
+
+        // resize appdetail to default values
+        var detail = document.getElementById('appdetail')
+        detail.style.left = null
+        var tabs = document.getElementById('apptabs')
+        tabs.style.display = null
+
+        view.detail       = "Tenant"
+
+        switch(ctxt) {
+          case "Monitoring":
+            view.detail = "Monitoring"
+            detail.style.left = "0px"
+            tabs.style.display = "none"
+            this.$emit("monitor")
+            break
+          case "Import":
+            view.detail = "Import"
+            break
+          case "Export":
+            view.detail = "Export"
+            break
+          case "Delta":
+            view.detail = "Delta"
+            detail.style.left = "0px"
+            tabs.style.display = "none"
+            break
+          default:
+        }
       },
       toggleState: function() {
+
         if (view.mode === 'current')
         {
           current = JSON.parse(JSON.stringify(model));
           view.mode='target'
           setModel(target)
-          setContext('Tenant')
         } else if (view.mode === 'target') {
           target = JSON.parse(JSON.stringify(model));
           view.mode='current'
           setModel(current)
-          setContext('Tenant')
         }
+        var detail = document.getElementById('appdetail')
+        detail.style.left = null
+        var tabs = document.getElementById('apptabs')
+        tabs.style.display = null
+        setContext('Tenant')
       },
       add: function() {
         if ( view.navigation === "Flavor" )    { addFlavor(); }
@@ -71,30 +118,34 @@ Vue.component( 'appheader',
     template: `
       <div id="appheader" v-bind:class="view.mode">
         <div class="logo"><i class="fas fa-cloud"/>&nbsp;VNF Designer</div>
-        <div v-if="view.detail !== 'Delta' && view.mode === 'current'" class="label">Current state: {{model.vnf}}/{{model.tenant.name}} ({{model.version}})</div>
-        <div v-if="view.detail !== 'Delta' && view.mode === 'target'"  class="label">Target state: {{model.vnf}}/{{model.tenant.name}} ({{model.version}})</div>
-        <div v-if="view.detail === 'Delta'" class="label">Current state: {{model.vnf}}/{{model.tenant.name}} ({{model.version}}) &rarr; Target state: {{model.vnf}}/{{model.tenant.name}} ({{model.version}})</div>
-        <div class="buttons">
-          <div v-on:click="reset">
+        <div id="apptitle" class="label">{{title}}</div>
+        <div id="appbuttons" class="buttons">
+          <div v-on:click="context('Tenant')" title="Tenant overview">
+            <i class="fas fa-map"/>&nbsp;Overview
+          </div>
+          <div v-on:click="context('Monitoring')" title="Monitoring overview" v-if="window.location.hostname!=''">
+            <i class="fas fa-heartbeat"/>&nbsp;Monitoring
+          </div>
+          <div v-on:click="reset" title="Reset model">
             <i class="fas fa-certificate"/>&nbsp;Reset
           </div>
-          <div v-on:click="validate">
+          <div v-on:click="validate" title="Validate model">
             <i class="fas fa-check-circle"/>&nbsp;Validate
           </div>
-          <div v-on:click="context('Import')">
+          <div v-on:click="context('Import')" title="Import model">
             <i class="fas fa-arrow-alt-circle-down"/>&nbsp;Import
           </div>
-          <div v-on:click="context('Export')">
+          <div v-on:click="context('Export')" title="Export model">
             <i class="fas fa-arrow-alt-circle-up"/>&nbsp;Export
           </div>
-          <div v-on:click="context('Delta')">
+          <div v-on:click="context('Delta')" title="Compare current and target state">
             <i class="fas fa-arrow-circle-right "/>&nbsp;Compare
           </div>
-          <div class="state" v-on:click="toggleState">
+          <div class="state" v-on:click="toggleState" title="Toggle between current and target state">
             &nbsp;<i class="fas fa-adjust"/>&nbsp; State: {{view.mode}}
           </div>
         </div>
-        <div class="tabs">
+        <div id="apptabs" class="tabs">
           <template v-if="view.navigation === 'Tenant'">
             <div class="active">General</div>
             <div v-on:click="context('Flavor')">Flavors</div>
@@ -130,7 +181,7 @@ Vue.component( 'appheader',
             <div v-on:click="context('Network')">Networks</div>
             <div class="active">Components</div>
           </template>
-          <div class="button" v-if="view.navigation!='Tenant' && view.navigation!='Delta'" v-on:click="add"><i class="fas fa-plus"/></div>
+          <div class="button" v-if="view.navigation!='Tenant' && view.navigation!='Delta' && view.navigation!='Monitoring'" v-on:click="add"><i class="fas fa-plus"/></div>
         </div>
       </div>`
   }
@@ -225,6 +276,11 @@ Vue.component( 'appdetail',
           v-bind:model="model"
           v-bind:view="view">
         </tenant>
+        <monitoring
+          v-if="view.detail === 'Monitoring'"
+          v-bind:model="model"
+          v-bind:view="view">
+        </monitoring>
       </div>`
   }
 )

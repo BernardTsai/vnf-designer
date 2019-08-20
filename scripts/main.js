@@ -1,5 +1,7 @@
+var app
+
 function main() {
-  var app = new Vue({
+  app = new Vue({
     el:   '#app',
     data: {model: model, view: view, templates: templates},
     template: `

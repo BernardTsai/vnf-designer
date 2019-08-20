@@ -1,9 +1,10 @@
 const DX         = 8;
 const DY         = 8;
-const NET_WIDTH  = 32;
+const NET_WIDTH  = 48;
 const NET_HEIGHT = 64;
 const CMP_WIDTH  = 200;
 const CMP_HEIGHT = 32;
+const CMP_HEIGHT2= 16;
 const TXT_HEIGHT = 16;
 const XOFFSET    = DX+CMP_WIDTH;
 const YOFFSET    = DY+NET_HEIGHT;
@@ -30,7 +31,7 @@ Vue.component( 'tenant_network',
     },
     computed: {
       t: function(index) {
-        return DY + TXT_HEIGHT;
+        return NET_HEIGHT;
       },
       l: function(index) {
         return CMP_WIDTH + (this.index+1) * (DX+NET_WIDTH) - 1;
@@ -39,7 +40,7 @@ Vue.component( 'tenant_network',
         return NET_WIDTH;
       },
       h: function(index) {
-        return DY+NET_HEIGHT + this.model.components.length * (DY+CMP_HEIGHT) - TXT_HEIGHT;
+        return DY + this.model.components.length * (DY+CMP_HEIGHT);
       }
     },
     template: `
@@ -50,9 +51,12 @@ Vue.component( 'tenant_network',
           left:        l + 'px',
           width:       w + 'px',
           height:      h + 'px'
-        }"
-        v-on:click.alt="viewNetwork"
-        v-bind:title="network.name + '\\nipv4: ' + network.ipv4 + '\\nipv6: ' + network.ipv6">
+        }">
+        <div class="icon"
+          @click="viewNetwork"
+          :title="network.name + '\\nipv4: ' + network.ipv4 + '\\nipv6: ' + network.ipv6">
+          <i class="fas fa-network-wired"/>
+        </div>
         <input v-model="network.name" v-on:change="handleChange">
       </div>`
   }
@@ -68,7 +72,7 @@ Vue.component( 'tenant_network2',
     },
     computed: {
       t: function(index) {
-        return DY + TXT_HEIGHT;
+        return NET_HEIGHT;
       },
       l: function(index) {
         return CMP_WIDTH + (this.model.networks.length+1) * (DX+NET_WIDTH) - 1;
@@ -77,7 +81,7 @@ Vue.component( 'tenant_network2',
         return NET_WIDTH;
       },
       h: function(index) {
-        return DY+NET_HEIGHT + this.model.components.length * (DY+CMP_HEIGHT) - TXT_HEIGHT;
+        return DY + this.model.components.length * (DY+CMP_HEIGHT);
       }
     },
     template: `
@@ -89,7 +93,11 @@ Vue.component( 'tenant_network2',
           left:        l + 'px',
           width:       w + 'px',
           height:      h + 'px'
-        }"><input class='label' value='new' readonly></div>
+        }">
+        <div class="icon">
+          <i class="fas fa-network-wired"/>
+        </div>
+        <input class='label' value='new' readonly></div>
       </div>`
   }
 )
@@ -194,8 +202,7 @@ Vue.component( 'tenant_component',
           left:   l + 'px',
           width:  w + 'px',
           height: h + 'px'
-        }"
-        v-on:click.alt="viewComponent">
+        }">
         <div v-bind:class="'zone zone-' + z">
           <select v-model="component.placement">
             <option disabled value="">Please select one</option>
@@ -204,6 +211,7 @@ Vue.component( 'tenant_component',
             </option>
           </select>
         </div>
+        <div class="icon" @click="viewComponent"><i class="fas fa-server"/></div>
         <div class="name"><input v-model="component.name" v-on:change="handleChange"></div>
         <div class="sizing" v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'">({{component.min}}/{{component.size}}/{{component.max}})</div>
         <tenant_interface
@@ -252,6 +260,7 @@ Vue.component( 'tenant_component2',
           height: h + 'px'
         }">
         <div class="'zone zone-O'"></div>
+        <div class="icon"><i class="fas fa-server"/></div>
         <div class="name">new component</div>
         <div class="sizing"></div>
       </div>`
@@ -265,8 +274,10 @@ Vue.component( 'tenant',
     props:    ['model','view'],
     methods: {
       handleClick: function(e) {
-        var x = e.pageX - PXOFFSET - XOFFSET;
-        var y = e.pageY - PYOFFSET - YOFFSET;
+        var element = document.getElementById("tenant_layout")
+
+        var x = element.scrollLeft + e.pageX - PXOFFSET - XOFFSET;
+        var y = element.scrollTop  + e.pageY - PYOFFSET - YOFFSET;
 
         var net_index = Math.floor(x/XSLOT);
         var cmp_index = Math.floor(y/YSLOT);
