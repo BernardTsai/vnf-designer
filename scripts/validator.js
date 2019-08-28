@@ -295,7 +295,7 @@ var schema = {
                 "network": { "type": "string",
                   "description": "The virtual network via which the service is exposed" },
 
-                "protocol": { "type": "string", "enum": ["tcp", "udp", "icmp"],
+                "protocol": { "type": "string", "enum": ["tcp", "udp", "icmp","sctp","none"],
                   "description": "The service protocol" },
 
                 "range": { "type": "string", "minimum": 1,
@@ -305,7 +305,7 @@ var schema = {
           },
 
           "dependencies": {
-            "description": "The dependencies to services provided by other componenntse",
+            "description": "The dependencies to services provided by other componennts",
             "type":        "array",
             "items": {
               "title":      "Component Network",

@@ -92,7 +92,7 @@ Vue.component(
         return ['EXT','INT']
       },
       protocols: function() {
-        return ['tcp','udp','icmp','any']
+        return ['tcp','udp','icmp','any','sctp','none']
       },
       userdata: function() {
         return this.component.userdata.map(function(data,index){ return {"uuid": uuidv4(), "index": index}})

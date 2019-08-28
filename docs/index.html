@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <titleVNF-Designer</title>
+  <style>
+    body {
+      font: 14px Arial;
+    }
+    a {
+      text-decoration: none;
+    }
+    pre {
+      background: lightgrey;
+      padding:    8px;
+    }
+    hr {
+      color: lightgrey;
+    }
+    table {
+       border-collapse: collapse;
+    }
+    th {
+      background:    lightgrey;
+      padding-left:  16px;
+      padding-right: 16px;
+      text-align:    left;
+    }
+    td {
+      border-bottom: 1px solid lightgrey;
+      padding-left:  16px;
+      padding-right: 16px;
+      text-align:    left;
+    }
+  </style>
+</head>
+<body>
+  <div id="content"></div>
+  <script src="../lib/marked.min.js"></script>
+  <script>
+    // determine markdown file from url: http(s)://<server>:<port>?<markdownfile>
+    var markdownfile = "readme.md"
+    var pos          = window.location.href.indexOf("?")
+    var url
+
+    if (pos >= 0) {
+      markdownfile = window.location.href.substr(pos+1)
+      prefix       = window.location.href.substr(0,pos)
+    } else {
+      pos    = window.location.href.length
+      prefix = window.location.href
+    }
+    pos -= "index.html".length
+    url =  window.location.href.substr(0,pos) + markdownfile
+
+    // prepare markdown renderer
+    const renderer = new marked.Renderer()
+
+    renderer.link = function(href, title, text) {
+      // normalise the title
+      title = title ? title : href
+
+      // check for absolute url
+      if (href.indexOf(":") >= 0){
+        return `<a href="${href}" title="${title}">${text}<a>`
+      }
+
+      return `<a href="${prefix}?${href}" title="${title}">${text}<a>`
+    }
+
+    marked.setOptions({renderer: renderer})
+
+    // load data file
+    var client = new XMLHttpRequest()
+    client.open('GET', url)
+    client.onreadystatechange = function() {
+      var markdown = client.responseText
+
+      // render file
+      document.getElementById('content').innerHTML = marked(markdown)
+    }
+    client.send()
+
+  </script>
+</body>
+</html>

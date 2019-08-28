@@ -211,9 +211,9 @@ Vue.component( 'tenant_component',
             </option>
           </select>
         </div>
-        <div class="icon" @click="viewComponent"><i class="fas fa-server"/></div>
         <div class="name"><input v-model="component.name" v-on:change="handleChange"></div>
         <div class="sizing" v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'">({{component.min}}/{{component.size}}/{{component.max}})</div>
+        <div class="icon" @click="viewComponent"><i class="fas fa-server"/></div>
         <tenant_interface
           v-for="(interface, subindex) in component.interfaces"
           :key="subindex"
