@@ -45,6 +45,10 @@ Vue.component( 'appheader',
             detail.style.left = "0px"
             tabs.style.display = "none"
             break
+          case "Docs":
+            var win = window.open("/docs/index.html", '_blank');
+            win.focus();
+            break;
           default:
         }
       },
@@ -140,6 +144,9 @@ Vue.component( 'appheader',
           </div>
           <div v-on:click="context('Delta')" title="Compare current and target state">
             <i class="fas fa-arrow-circle-right "/>&nbsp;Compare
+          </div>
+          <div v-on:click="context('Docs')" title="Documentation" v-if="window.location.hostname!=''">
+            <i class="fas fa-book"/>&nbsp;Docs
           </div>
           <div class="state" v-on:click="toggleState" title="Toggle between current and target state">
             &nbsp;<i class="fas fa-adjust"/>&nbsp; State: {{view.mode}}

@@ -27,6 +27,10 @@ setInterval(tick, 1000)
 //------------------------------------------------------------------------------
 
 function setContext(context) {
+	// docs
+	if ( context === 'Docs' ) {
+		return
+	}
 	// import
 	if ( context === 'Import' ) {
 		view.navigation = 'Tenant'
@@ -51,6 +55,7 @@ function setContext(context) {
 		view.detail     = 'Tenant'
 		return
 	}
+
 
 	// otherwise
 	view.navigation = context
