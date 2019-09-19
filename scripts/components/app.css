@@ -96,7 +96,7 @@ textare:focus, select:focus, input:focus {
   height:           56px;
   line-height:      32px;
   vertical-align:   middle;
-  background-color: lightgrey;
+  background-color: #2A3F54;
   border-bottom:    1px solid grey;
   min-width:        1024px;
 }
@@ -120,9 +120,8 @@ textare:focus, select:focus, input:focus {
   position:      absolute;
   left:          0px;
   width:         320px;
-  top:           32px;
+  top:           34px;
   height:        24px;
-  border-bottom: 1px solid grey;
 }
 
 #appheader .tabs div {
@@ -133,21 +132,19 @@ textare:focus, select:focus, input:focus {
   border-top-left-radius:   8px;
   border-top-right-radius:  8px;
   cursor:                   pointer;
-  background-color:         lightgrey;
+  background-color:         grey;
+  color:                    black;
   margin-top:               2px;
-  border-left:              1px solid grey;
-  border-right:             1px solid grey;
-  border-top:               1px solid grey;
-  margin-left:              1px;
+  margin-right:             1px;
   font-size:                11px;
 }
 
+#apptitle {
+  color: white;
+}
+
 #appheader .tabs div.active {
-  background-color:         grey;
-  border-left:              1px solid grey;
-  border-right:             1px solid grey;
-  border-top:               1px solid grey;
-  color:                    white;
+  background-color:         lightgrey;
 }
 
 #appheader .tabs div.button {
@@ -177,7 +174,7 @@ textare:focus, select:focus, input:focus {
   right:            0px;
   top:              0px;
   bottom:           0px;
-  background-color: #eee;
+  background-color: lightgrey;
 }
 
 #appnavigation .list .item {
