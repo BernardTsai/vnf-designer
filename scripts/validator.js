@@ -340,7 +340,7 @@ function validate_schema(object) {
   if (!valid) {
     setFocus(verify.errors[0].dataPath)
 
-    return "Schema error:\nfield " + verify.errors[0].message;
+    return "Schema error:\nfield " + verify.errors[0].message + "\nLocation: " + verify.errors[0].dataPath;
   }
 
   return '';
@@ -371,14 +371,14 @@ function validate_xref(object) {
     if ( !flavors.includes(component.flavor) ) {
       setFocus(".components[" + index + "].flavor")
 
-      return "Reference error:\ninvalid flavor";
+      return "Reference error:\ninvalid flavor " + ".components[" + index + "].flavor";
     }
 
     // check image
     if ( !images.includes(component.image) ) {
       setFocus(".components[" + index + "].image")
 
-      return "Reference error:\ninvalid image";
+      return "Reference error:\ninvalid image " + ".components[" + index + "].image";
     }
 
     // check interfaces
@@ -391,7 +391,7 @@ function validate_xref(object) {
       if ( !networks.includes(interface.network) ) {
         setFocus(".components[" + index + "].interfaces[" + subindex + "].network")
 
-        return "Reference error\ninvalid network";
+        return "Reference error\ninvalid network " + ".components[" + index + "].interfaces[" + subindex + "].network";
       }
     }
 
@@ -402,7 +402,7 @@ function validate_xref(object) {
       if ( !component_networks.includes(service.network) ) {
         setFocus(".components[" + index + "].services[" + subindex + "].network")
 
-        return "Reference error\ninvalid network";
+        return "Reference error\ninvalid network " + ".components[" + index + "].services[" + subindex + "].network";
       }
     }
 
@@ -413,13 +413,13 @@ function validate_xref(object) {
       if ( !components.includes(dependency.component) ) {
         setFocus(".components[" + index + "].dependencies[" + subindex + "].component")
 
-        return "Reference error\ninvalid component";
+        return "Reference error\ninvalid component " + ".components[" + index + "].dependencies[" + subindex + "].component";
       }
 
       if ( !component_networks.includes(dependency.network) ) {
         setFocus(".components[" + index + "].dependencies[" + subindex + "].network")
 
-        return "Reference error\ninvalid network";
+        return "Reference error\ninvalid network " + ".components[" + index + "].dependencies[" + subindex + "].component";
       }
 
       var reference = dependency.component + ":" + dependency.service
@@ -427,7 +427,7 @@ function validate_xref(object) {
       if ( !services.includes(reference) ) {
         setFocus(".components[" + index + "].dependencies[" + subindex + "].service")
 
-        return "Reference error\ninvalid service";
+        return "Reference error\ninvalid service " + ".components[" + index + "].dependencies[" + subindex + "].service";
       }
     }
   }

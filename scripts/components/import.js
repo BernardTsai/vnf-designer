@@ -37,7 +37,7 @@ Vue.component(
           object = jsyaml.safeLoad(data);
         }
         catch (err)  {
-          view.modal = err.message
+          view.modal = "Yaml Error:\n" + err.message
           return
         }
 
