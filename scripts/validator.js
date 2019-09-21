@@ -6,7 +6,7 @@ var schema = {
   "required":    ["schema", "vnf", "version", "tenant", "flavors", "images", "networks", "components"],
   "properties": {
 
-    "schema": { "type": "string", "enum": ['1.0.0'],
+    "schema": { "type": "string", "enum": ['1.0.1'],
       "description": "The version of the schema" },
 
     "vnf": { "type": "string", "minLength": 1,
@@ -211,7 +211,7 @@ var schema = {
       "items": {
         "title":    "Component",
         "type":     "object",
-        "required": ["uuid","name","placement","flavor","image","min","size","max","interfaces","volumes","services","dependencies"],
+        "required": ["uuid","name","placement","flavor","image","min","size","max","interfaces","volumes","services","dependencies","userdata"],
         "properties": {
 
           "uuid": { "type": "string",
@@ -237,6 +237,9 @@ var schema = {
 
           "max": { "type": "number",
             "description": "Maximum size of the cluster" },
+
+          "userdata": { "type": "string",
+            "description": "Initialisation script" },
 
           "interfaces": {
             "description": "The interfaces to virtual networks",

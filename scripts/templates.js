@@ -111,15 +111,13 @@ components:
 {% for dependency in component.dependencies %}
       - { component: "{{dependency.component}}", service: "{{dependency.service}}", network: "{{dependency.network}}" }
 {% endfor %}
-{% if component.userdata|length == 0 %}
-    userdata:     []
+{% if component.userdata == "" %}
+    userdata:     ""
 {% endif -%}
-{% if component.userdata|length >  0 %}
-    userdata:
+{% if component.userdata != "" %}
+    userdata: |
+      {{ component.userdata | indent(6) | safe }}
 {% endif -%}
-{% for userdata in component.userdata %}
-      - "{{ userdata | replace('\n', '\u005C\\n')  }}"
-{% endfor %}
 
 {% endfor %}
 `
@@ -603,6 +601,10 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
 {% endfor %}
       meta:
        hostname: {{component.name}}{{ '{{ index }}' }}
+{% if component.userdata != "" %}
+      userdata: |
+        {{ component.userdata | indent(8) | safe }}
+{% endif %}
 
 {% if component.name == "jumphost" %}{% if tenant.jumphost != "" %}
   # ----- floating IP for jumphost -----
@@ -617,7 +619,7 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
       state:               present
       server:              jumphost
       floating_ip_address: "{{tenant.jumphost}}"
-      fixed_address:       "{{" jumphost_oam_facts.ansible_facts.openstack_ports[0].fixed_ips[0].ip_address "}}"
+      fixed_address:       "{{ '{{' }} jumphost_oam_facts.ansible_facts.openstack_ports[0].fixed_ips[0].ip_address {{ '}}' }}"
       validate_certs:      no
 
 {% endif %}{% endif %}

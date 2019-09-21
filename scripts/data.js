@@ -1,6 +1,6 @@
 var data = `
 ---
-schema:     1.0.0
+schema:     1.0.1
 vnf:        demo
 version:    1.0.0
 tenant:
@@ -118,7 +118,7 @@ components:
     services:     []
     dependencies:
       - { component: "firewall", service: "https", network: "pub" }
-    userdata:     []
+    userdata:     ""
 
   - uuid:         "9572cd15-0c75-43f2-ad28-7031f172132f"
     name:         "firewall"
@@ -138,7 +138,7 @@ components:
       - { name: "https", network: "pub", protocol: "tcp", range: "443" }
     dependencies:
       - { component: "application", service: "https", network: "ext" }
-    userdata:     []
+    userdata:     ""
 
   - uuid:         "4972819c-7c64-4e26-a0a0-41d86d798773"
     name:         "application"
@@ -157,7 +157,7 @@ components:
       - { name: "ssh", network: "oam", protocol: "tcp", range: "22" }
       - { name: "https", network: "ext", protocol: "tcp", range: "443" }
     dependencies: []
-    userdata:     []
+    userdata:     ""
 
   - uuid:         "871076e7-40d9-4a24-b35f-f14adac5a67c"
     name:         "database"
@@ -178,7 +178,7 @@ components:
       - { name: "replication", network: "int", protocol: "tcp", range: "33061" }
     dependencies:
       - { component: "database", service: "replication", network: "int" }
-    userdata:     []
+    userdata:     ""
 
   - uuid:         "b2b214b6-37b5-4f4d-8706-8ca590b14a38"
     name:         "devops"
@@ -194,6 +194,6 @@ components:
     services:     []
     dependencies:
       - { component: "firewall", service: "ssh", network: "pub" }
-    userdata:     []
+    userdata:     ""
 
 `

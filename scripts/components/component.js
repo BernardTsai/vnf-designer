@@ -253,12 +253,7 @@ Vue.component(
         <div v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'" class="subheader">User Data:</div>
 
         <div v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'" class="line">
-          <label class="top">Data:</label>
-          <label v-on:click="addUserdata()"><i class="fas fa-plus-circle"/></label>
-        </div>
-        <div v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'" class="line" v-for="(userdata,index) in userdata">
-          <textarea class="userdata" v-bind:id="userdata.uuid" v-bind:name="userdata.uuid" v-model="component.userdata[userdata.index]"></textarea>
-          <label v-on:click="delUserdata(userdata)"><i class="fas fa-minus-circle"/></label>
+          <textarea class="userdata" v-model="component.userdata"></textarea>
         </div>
 
         <div class="line">&nbsp;</div>

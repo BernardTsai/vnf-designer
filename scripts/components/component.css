@@ -54,7 +54,7 @@
 #componentform textarea.userdata {
   box-sizing:     border-box;
   width:          800px;
-  height:         5em;
+  height:         11em;
   vertical-align: top;
   margin:         0px;
 }
