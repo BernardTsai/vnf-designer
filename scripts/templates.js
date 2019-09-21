@@ -605,12 +605,20 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
        hostname: {{component.name}}{{ '{{ index }}' }}
 
 {% if component.name == "jumphost" %}{% if tenant.jumphost != "" %}
-   # ----- floating IP for jumphost -----
-   - name: Assign floating IP to jumphost
-     os_floating_ip:
-       state:               present
-       server:              jumphost
-       floating_ip_address: "{{env_vars.JUMPHOST}}"
+  # ----- floating IP for jumphost -----
+  - name: Determine jumphost_oam port information
+    os_port_facts:
+      port:           "jumphost_oam"
+      validate_certs: no
+    register: jumphost_oam_facts
+
+  - name: Assign floating IP to jumphost
+    os_floating_ip:
+      state:               present
+      server:              jumphost
+      floating_ip_address: "{{tenant.jumphost}}"
+      fixed_address:       "{{" jumphost_oam_facts.ansible_facts.openstack_ports[0].fixed_ips[0].ip_address "}}"
+      validate_certs:      no
 
 {% endif %}{% endif %}
 
@@ -757,3 +765,13 @@ templates['Router (delete)'] = `{% for component in components %}{% if component
 
 
 {% endif %}{% endfor %}`
+
+//------------------------------------------------------------------------------
+
+templates['openrc'] = `
+export OS_TENANT_NAME={{tenant.name}}
+export OS_PROJECT_NAME={{tenant.name}}
+export OS_USERNAME={{tenant.auth.username}}
+export OS_PASSWORD={{tenant.auth.password}}
+export OS_AUTH_URL={{tenant.auth.url}}
+export OS_CACERT=openstack.crt`

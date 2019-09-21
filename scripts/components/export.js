@@ -38,6 +38,10 @@ Vue.component(
         var txt = render(model, "Environment")
         zip.file("environment.yml", txt)
 
+        // export openrc file
+        var txt = render(model, "openrc")
+        zip.file("openrc", txt)
+
         // construct folders
         var tenant    = zip.folder("tenant");
         var networks  = zip.folder("networks");
