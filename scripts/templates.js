@@ -414,11 +414,21 @@ templates['Servers (define security)'] = `{% for component in components %}{% if
       remote_ip_prefix: "{{ '{{item.remote_ip_prefix}}' }}"
       direction:        ingress
       validate_certs:   no
+      ignore_errors:    yes
     loop:
     - {protocol: icmp, port_range_min: 0, port_range_max: 255, remote_ip_prefix: 0.0.0.0/0}
 {% for service in component.services %}{% if interface.network == service.network %}
 {% for network in networks %}{% if interface.network == network.name %}
     - {protocol: {{service.protocol}}, port_range_min: {{service.range | portmin }}, port_range_max: {{service.range | portmax }}, remote_ip_prefix: {{network.ipv4}} }
+{% endif %}{% endfor %}
+{% endif %}{% endfor %}
+{% for service in component.services %}{% if interface.network == service.network %}
+{% for component2 in components %}{% if component2.placement != 'ROUTER' %}
+{% for dependency in component2.dependencies %}{% if dependency.component == component.name %}{% if dependency.service == service.name %}
+{% for network2 in networks %}{% if dependency.network == network2.name %}
+    - {protocol: {{service.protocol}}, port_range_min: {{service.range | portmin }}, port_range_max: {{service.range | portmax }}, remote_ip_prefix: {{network2.ipv4}} }
+{% endif %}{% endfor %}
+{% endif %}{% endif %}{% endfor %}
 {% endif %}{% endfor %}
 {% endif %}{% endfor %}
 
@@ -465,12 +475,42 @@ templates['Servers (define security all)'] = `#!/usr/bin/env ansible-playbook
 
 //------------------------------------------------------------------------------
 
+templates['Servers (define security all2)'] = `#!/usr/bin/env ansible-playbook
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
+{% if component.max == 1 %}
+$SCRIPTPATH/{{component.name}}/define_security.yml &
+{% else %}
+{% for index in range(component.max) %}
+$SCRIPTPATH/{{component.name}}/define_security.yml --extra-vars "nr= {{index+1}}" &
+{% endfor %}
+{% endif %}
+{% endif %}{% endif %}{% endfor %}
+wait`
+
+//------------------------------------------------------------------------------
+
 templates['Servers (undefine security all)'] = `#!/usr/bin/env ansible-playbook
 ---
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 - name: Create {{component.name}}
   import_playbook: {{component.name}}/undefine_security.yml
 {% endif %}{% endif %}{% endfor %}`
+
+//------------------------------------------------------------------------------
+
+templates['Servers (undefine security all2)'] = `#!/usr/bin/env ansible-playbook
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
+{% if component.max == 1 %}
+$SCRIPTPATH/{{component.name}}/undefine_security.yml &
+{% else %}
+{% for index in range(component.max) %}
+$SCRIPTPATH/{{component.name}}/undefine_security.yml --extra-vars "nr= {{index+1}}" &
+{% endfor %}
+{% endif %}
+{% endif %}{% endif %}{% endfor %}
+wait`
 
 //------------------------------------------------------------------------------
 
@@ -510,15 +550,14 @@ templates['Servers (create all2)'] = `#!/usr/bin/env bash
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 {% if component.max == 1 %}
-$SCRIPTPATH/{{component.name}}/create &
+$SCRIPTPATH/{{component.name}}/create.yml &
 {% else %}
 {% for index in range(component.max) %}
-$SCRIPTPATH/{{component.name}}/create --extra-vars "nr= {{index+1}}" &
+$SCRIPTPATH/{{component.name}}/create.yml --extra-vars "nr= {{index+1}}" &
 {% endfor %}
 {% endif %}
 {% endif %}{% endif %}{% endfor %}
-wait
-`
+wait`
 
 //------------------------------------------------------------------------------
 
@@ -551,6 +590,21 @@ templates['Servers (delete all)'] = `#!/usr/bin/env ansible-playbook
 {% endfor %}
 {% endif %}
 {% endif %}{% endif %}{% endfor %}`
+
+//------------------------------------------------------------------------------
+
+templates['Servers (delete all2)'] = `#!/usr/bin/env bash
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
+{% if component.max == 1 %}
+$SCRIPTPATH/{{component.name}}/delete.yml &
+{% else %}
+{% for index in range(component.max) %}
+$SCRIPTPATH/{{component.name}}/delete.yml --extra-vars "nr= {{index+1}}" &
+{% endfor %}
+{% endif %}
+{% endif %}{% endif %}{% endfor %}
+wait`
 
 //------------------------------------------------------------------------------
 
@@ -830,7 +884,7 @@ Flavors:
 {% set found = false %}
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 {% if found == false %}{% if component.flavor == flavor.name %}
-* {{(flavor.name + "                    ") | truncate(20, true, "") }}: {{flavor.vcpu}} vCPUs / {{flavor.ram}} [GB ram] / {{flavor.disk}} [GB disk]
+* {{(flavor.name + "                    ") | truncate(20, true, "") }}: {{flavor.vcpu}} vCPUs / {{flavor.ram}} [MB ram] / {{flavor.disk}} [GB disk]
 {% set found = true %}
 {% endif %}{% endif %}
 {% endif %}{% endif %}{% endfor %}

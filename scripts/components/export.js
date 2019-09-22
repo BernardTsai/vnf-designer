@@ -86,9 +86,15 @@ Vue.component(
         var txt = render(model, "Servers (define security all)")
         servers.file("define_security.yml", txt, {unixPermissions: "755"})
 
+        var txt = render(model, "Servers (define security all2)")
+        servers.file("define_security2.yml", txt, {unixPermissions: "755"})
+
         // export servers undefine security all file
-        var txt = render(model, "Servers (define security all)")
+        var txt = render(model, "Servers (undefine security all)")
         servers.file("undefine_security.yml", txt, {unixPermissions: "755"})
+
+        var txt = render(model, "Servers (undefine security all2)")
+        servers.file("undefine_security2.yml", txt, {unixPermissions: "755"})
 
         // export servers create all file
         var txt = render(model, "Servers (create all)")
@@ -100,6 +106,9 @@ Vue.component(
         // export servers delete all file
         var txt = render(model, "Servers (delete all)")
         servers.file("delete.yml", txt, {unixPermissions: "755"})
+
+        var txt = render(model, "Servers (delete all2)")
+        servers.file("delete2.yml", txt, {unixPermissions: "755"})
 
         // export server security definition files
         var txt  = render(model, "Servers (define security)")
