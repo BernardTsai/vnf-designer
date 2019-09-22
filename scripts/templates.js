@@ -506,6 +506,22 @@ templates['Servers (create all)'] = `#!/usr/bin/env ansible-playbook
 
 //------------------------------------------------------------------------------
 
+templates['Servers (create all2)'] = `#!/usr/bin/env bash
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
+{% if component.max == 1 %}
+$SCRIPTPATH/{{component.name}}/create &
+{% else %}
+{% for index in range(component.max) %}
+$SCRIPTPATH/{{component.name}}/create --extra-vars "nr= {{index+1}}" &
+{% endfor %}
+{% endif %}
+{% endif %}{% endif %}{% endfor %}
+wait
+`
+
+//------------------------------------------------------------------------------
+
 templates['Servers (delete all)'] = `#!/usr/bin/env ansible-playbook
 ---
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
@@ -777,3 +793,52 @@ export OS_USERNAME={{tenant.auth.username}}
 export OS_PASSWORD={{tenant.auth.password}}
 export OS_AUTH_URL={{tenant.auth.url}}
 export OS_CACERT=openstack.crt`
+
+//------------------------------------------------------------------------------
+
+templates['Prequisites'] = `
+{% set instances, volumes, vcpu, ram, disk = 0 %}
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
+{% set instances = instances + 1 %}
+{% for flavor in flavors %}{% if component.flavor == flavor.name %}
+{% set vcpu = vcpu + flavor.vcpu %}
+{% set ram  = ram  + flavor.ram * 1024 %}
+{% set disk = disk + flavor.disk %}
+{% endif %}{% endfor %}
+{% for volume in component.volumes %}
+{% set volumes = volumes + 1 %}
+{% set disk    = disk  + volume.size * 1024 %}
+{% endfor %}
+{% endif %}{% endif %}{% endfor %}
+Prequisites:
+============
+
+Tenant: {{tenant.name}}
+
+Quota:
+------
+
+* Virtual machines:     {{instances}}
+* Volumes:              {{volumes}}
+* Virtual CPUs:         {{vcpu}}
+* Random Access Memory: {{ram}} [MB]
+* Disk Storage:         {{disk}} [MB]
+
+Flavors:
+--------
+{% for flavor in flavors %}
+{% set found = false %}
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
+{% if found == false %}{% if component.flavor == flavor.name %}
+* {{(flavor.name + "                    ") | truncate(20, true, "") }}: {{flavor.vcpu}} vCPUs / {{flavor.ram}} [GB ram] / {{flavor.disk}} [GB disk]
+{% set found = true %}
+{% endif %}{% endif %}
+{% endif %}{% endif %}{% endfor %}
+{% endfor %}
+
+Images:
+-------
+{% for image, components in components | groupby("image") %}
+* {{(image + "                               ") | truncate(32, true, "") }}: {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %} {{ component.name }}{% endif %}{% endif %}{% endfor %}\n
+{% endfor %}
+`

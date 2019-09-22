@@ -42,6 +42,10 @@ Vue.component(
         var txt = render(model, "openrc")
         zip.file("openrc", txt)
 
+        // export prequisites file
+        var txt = render(model, "Prequisites")
+        zip.file("prequisites.txt", txt)
+
         // construct folders
         var tenant    = zip.folder("tenant");
         var networks  = zip.folder("networks");
@@ -89,6 +93,9 @@ Vue.component(
         // export servers create all file
         var txt = render(model, "Servers (create all)")
         servers.file("create.yml", txt, {unixPermissions: "755"})
+
+        var txt = render(model, "Servers (create all2)")
+        servers.file("create2.yml", txt, {unixPermissions: "755"})
 
         // export servers delete all file
         var txt = render(model, "Servers (delete all)")

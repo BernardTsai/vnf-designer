@@ -6,7 +6,7 @@ var schema = {
   "required":    ["schema", "vnf", "version", "tenant", "flavors", "images", "networks", "components"],
   "properties": {
 
-    "schema": { "type": "string", "enum": ['1.0.1'],
+    "schema": { "type": "string", "enum": ["1.0.1"],
       "description": "The version of the schema" },
 
     "vnf": { "type": "string", "minLength": 1,

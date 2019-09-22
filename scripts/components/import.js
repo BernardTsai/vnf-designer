@@ -58,6 +58,14 @@ Vue.component(
         }
 
         // copy data to model
+        if (this.view.mode == "current")
+        {
+          current = object
+        }
+        else
+        {
+          target = object
+        }
         setModel(object)
 
         // set focus to tenant
