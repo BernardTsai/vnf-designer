@@ -70,14 +70,14 @@ control_path = ./mux-%r@%h:%p`
 
 files['config'] = `
 Host jumphost
-  User         "ubuntu"
-  HostName     "{{ jumphost }}"
+  User         ubuntu
+  HostName     {{ jumphost }}
 
 {% for server_name in server_names %}{% if server_name != "jumphost" %}
 {% for port in ports.ansible_facts.openstack_ports %}{% if port.name == (server_name + '_oam') %}
 Host {{server_name}}
-  User         "centos"
-  ProxyCommand ssh -i ./files/id_rsa ubuntu@{{ jumphost }} -W %h:%p
+  User         centos
+  ProxyCommand ssh -i ./id_rsa ubuntu@{{ jumphost }} -W %h:%p
   HostName     {{ port.fixed_ips | map(attribute='ip_address') | join(', ') }}
 
 {% endif %}{% endfor %}
@@ -115,5 +115,6 @@ files['ssh.yml'] = `#!/usr/bin/env ansible-playbook
         key: '{{ item }}'
         state: present
         exclusive: True
+      become: yes
       with_file:
         - ../authorized_keys`

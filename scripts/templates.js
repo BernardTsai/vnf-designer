@@ -869,6 +869,8 @@ Prequisites:
 
 Tenant: {{tenant.name}}
 
+Name of ssh-key: fiveg_key
+
 Quota:
 ------
 
