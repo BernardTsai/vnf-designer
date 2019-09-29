@@ -77,7 +77,7 @@ Host jumphost
 {% for port in ports.ansible_facts.openstack_ports %}{% if port.name == (server_name + '_oam') %}
 Host {{server_name}}
   User         centos
-  ProxyCommand ssh -i ./id_rsa ubuntu@{{ jumphost }} -W %h:%p
+  ProxyCommand ssh -i ../repository/id_rsa ubuntu@{{ jumphost }} -W %h:%p
   HostName     {{ port.fixed_ips | map(attribute='ip_address') | join(', ') }}
 
 {% endif %}{% endfor %}
@@ -86,7 +86,7 @@ Host {{server_name}}
 Host *
   StrictHostKeyChecking no
   UserKnownHostsFile=/dev/null
-  IdentityFile ./id_rsa`
+  IdentityFile ../repository/id_rsa`
 
 //------------------------------------------------------------------------------
 
@@ -95,6 +95,11 @@ files['inventory'] = `localhost ansible_connection=local
 [servers]
 {% for server_name in server_names %}{% if server_name != "jumphost" %}
 {{server_name}}
+{% endif %}{% endfor %}
+
+[ssh_servers]
+{% for server_name in ssh_server_names %}{% if server_name != "jumphost" %}
+{{server_name}}
 {% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
@@ -102,19 +107,3 @@ files['inventory'] = `localhost ansible_connection=local
 files['default_inventory'] = `localhost ansible_connection=local `
 
 //------------------------------------------------------------------------------
-
-files['ssh.yml'] = `#!/usr/bin/env ansible-playbook
----
-- name: Update ssh keys
-  hosts: servers
-  gather_facts: false
-  tasks:
-    - name: Update authorized keys file
-      authorized_key:
-        user: root
-        key: '{{ item }}'
-        state: present
-        exclusive: True
-      become: yes
-      with_file:
-        - ../authorized_keys`

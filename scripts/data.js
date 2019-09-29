@@ -106,6 +106,7 @@ networks:
 components:
   - uuid:         "f76afc3d-b19d-4f67-ab56-f7261501b5c4"
     name:         "user"
+    user:         "root"
     placement:    "OTHER"
     flavor:       "none"
     image:        "none"
@@ -122,6 +123,7 @@ components:
 
   - uuid:         "9572cd15-0c75-43f2-ad28-7031f172132f"
     name:         "firewall"
+    user:         "root"
     placement:    "EXT"
     flavor:       "standard"
     image:        "CentOS 7"
@@ -142,6 +144,7 @@ components:
 
   - uuid:         "4972819c-7c64-4e26-a0a0-41d86d798773"
     name:         "application"
+    user:         "root"
     placement:    "EXT"
     flavor:       "none"
     image:        "none"
@@ -161,6 +164,7 @@ components:
 
   - uuid:         "871076e7-40d9-4a24-b35f-f14adac5a67c"
     name:         "database"
+    user:         "root"
     placement:    "INT"
     flavor:       "none"
     image:        "none"

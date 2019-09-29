@@ -308,6 +308,20 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
 {% endif %}
 {% endif %}{% endif %}{% endfor %}
 
+    - name: Define ssh servers
+      set_fact:
+        ssh_server_names:
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.name != '' %}
+{% if component.max == 1 %}
+          - {{component.name}}
+{% else %}
+{% for server_index in range(1,1+component.max,1) %}
+          - {{component.name}}-{{server_index}}
+{% endfor %}
+{% endif %}
+{% endif %}{% endif %}{% endif %}{% endfor %}
+
+
     - name: Define ports
       set_fact:
         port_names:
@@ -846,7 +860,47 @@ export OS_PROJECT_NAME={{tenant.name}}
 export OS_USERNAME={{tenant.auth.username}}
 export OS_PASSWORD={{tenant.auth.password}}
 export OS_AUTH_URL={{tenant.auth.url}}
-export OS_CACERT=openstack.crt`
+export OS_CACERT=../repository/openstack.crt`
+
+//------------------------------------------------------------------------------
+
+templates['ssh'] = `#!/usr/bin/env ansible-playbook
+---
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.user != '' %}
+{% if component.max == 1 %}
+- name: Update ssh keys for server {{component.name}}
+  hosts: '{{component.name}}'
+  gather_facts: false
+  tasks:
+    - name: Update authorized keys file for server {{component.name}}
+      authorized_key:
+        user: '{{ component.user }}'
+        key: "{{ '{{ item }}' }}"
+        state: present
+        exclusive: True
+      become: yes
+      with_file:
+        - ../../repository/authorized_keys
+
+{% else %}
+{% for server_index in range(1,1+component.max,1) %}
+- name: Update ssh keys for server {{component.name}}-{{server_index}}
+  hosts: '{{component.name}}-{{server_index}}'
+  gather_facts: false
+  tasks:
+    - name: Update authorized keys file for server {{component.name}}-{{server_index}}
+      authorized_key:
+        user: '{{ component.user }}'
+        key: "{{ '{{ item }}' }}"
+        state: present
+        exclusive: True
+      become: yes
+      with_file:
+        - ../../repository/authorized_keys
+
+{% endfor %}
+{% endif %}
+{% endif %}{% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
 

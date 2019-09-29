@@ -47,12 +47,12 @@ Vue.component(
         zip.file("prequisites.txt", txt)
 
         // construct folders
-        var tenant    = zip.folder("tenant");
-        var networks  = zip.folder("networks");
-        var servers   = zip.folder("servers");
-        var routers   = zip.folder("router");
-        var templates = zip.folder("templates");
-        var output    = zip.folder("output");
+        var tenant    = zip.folder("tenant")
+        var networks  = zip.folder("networks")
+        var servers   = zip.folder("servers")
+        var routers   = zip.folder("router")
+        var templates = zip.folder("templates")
+        var output    = zip.folder("output")
 
         // construct a folder for each internal component
         var server_folders = {}
@@ -110,6 +110,10 @@ Vue.component(
         var txt = render(model, "Servers (delete all2)")
         servers.file("delete2.yml", txt, {unixPermissions: "755"})
 
+        // export servers ssh keys update file
+        var txt = render(model, "ssh")
+        servers.file("ssh.yml", txt, {unixPermissions: "755"})
+
         // export server security definition files
         var txt  = render(model, "Servers (define security)")
         var txts = splitter(txt)
@@ -152,7 +156,6 @@ Vue.component(
 
         // export networks and servers template file
         // export ansible cfg file
-        servers.file(   "ssh.yml",        files['ssh.yml'], {unixPermissions: "755"})
         zip.file(       "ansible.cfg",    files['ansible.cfg'])
         templates.file( "networks.tmpl",  files['networks.tmpl'])
         templates.file( "servers.tmpl",   files['servers.tmpl'])
@@ -186,7 +189,7 @@ Vue.component(
           var element  = document.createElement('a');
 
           element.setAttribute('href', URL.createObjectURL(content) )
-          element.setAttribute('download', "model.zip");
+          element.setAttribute('download', "model-" + model.version + ".zip");
 
           element.style.display = 'none';
           document.body.appendChild(element);

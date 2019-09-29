@@ -117,6 +117,8 @@ Vue.component(
         <div class="line">
           <label for="name">Name:</label>
           <input class="col5" v-model="component.name" id="name" name="name" required>
+          <label for="name" v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'">User:</label>
+          <input class="col5" v-model="component.user" id="user" name="user" required v-if="component.placement != 'OTHER' && component.placement != 'ROUTER'">
         </div>
         <div class="line">
           <label for="placement">Placement:</label>

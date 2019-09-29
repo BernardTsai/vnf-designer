@@ -220,8 +220,11 @@ var schema = {
           "name": { "type": "string",
             "description": "Name of the virtual server" },
 
+          "user": { "type": "string",
+            "description": "Name of the user account" },
+
           "placement": { "type": "string", "enum": ["OTHER", "EXT", "INT", "MGMT", "ROUTER"],
-            "description": "Placement of the virtual server" },
+            "description": "Placement of the virtual server or type of component" },
 
           "flavor": { "type": "string",
             "description": "Name of the virtual server sizing" },
