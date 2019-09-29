@@ -567,7 +567,7 @@ SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 $SCRIPTPATH/{{component.name}}/create.yml &
 {% else %}
 {% for index in range(component.max) %}
-$SCRIPTPATH/{{component.name}}/create.yml --extra-vars "nr= {{index+1}}" &
+$SCRIPTPATH/{{component.name}}/create.yml --extra-vars "nr={{index+1}}" &
 {% endfor %}
 {% endif %}
 {% endif %}{% endif %}{% endfor %}
@@ -614,7 +614,7 @@ SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 $SCRIPTPATH/{{component.name}}/delete.yml &
 {% else %}
 {% for index in range(component.max) %}
-$SCRIPTPATH/{{component.name}}/delete.yml --extra-vars "nr= {{index+1}}" &
+$SCRIPTPATH/{{component.name}}/delete.yml --extra-vars "nr={{index+1}}" &
 {% endfor %}
 {% endif %}
 {% endif %}{% endif %}{% endfor %}
