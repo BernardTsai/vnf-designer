@@ -111,8 +111,11 @@ Vue.component(
         servers.file("delete2.yml", txt, {unixPermissions: "755"})
 
         // export servers ssh keys update file
-        var txt = render(model, "ssh")
+        var txt = render(model, "Servers (ssh all)")
         servers.file("ssh.yml", txt, {unixPermissions: "755"})
+
+        var txt = render(model, "Servers (ssh all2)")
+        servers.file("ssh2.yml", txt, {unixPermissions: "755"})
 
         // export server security definition files
         var txt  = render(model, "Servers (define security)")
@@ -152,6 +155,16 @@ Vue.component(
           var folder  = server_folders[server]
           var content = txts[server]
           folder.file("delete.yml", content, {unixPermissions: "755"})
+        }
+
+        // export server ssh management files
+        var txt  = render(model, "Servers (ssh)")
+        var txts = splitter(txt)
+
+        for (var server in txts) {
+          var folder  = server_folders[server]
+          var content = txts[server]
+          folder.file("ssh.yml", content, {unixPermissions: "755"})
         }
 
         // export networks and servers template file

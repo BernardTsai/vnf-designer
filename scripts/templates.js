@@ -792,6 +792,88 @@ templates['Servers (delete)'] = `{% for component in components %}{% if componen
 
 //------------------------------------------------------------------------------
 
+templates['Servers (ssh all)'] = `#!/usr/bin/env ansible-playbook
+---
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.user != '' %}
+{% if component.max == 1 %}
+- name: Unset nr
+  hosts:        localhost
+  connection:   local
+  gather_facts: false
+  tasks:
+  - name: Set nr = ""
+    set_fact:
+      nr: ""
+- name: Create {{component.name}}
+  import_playbook: {{component.name}}/create.yml
+{% else %}
+{% for index in range(component.max) %}
+- name: Set nr {{index+1}}
+  hosts:        localhost
+  connection:   local
+  gather_facts: false
+  tasks:
+  - name: Set nr = {{index+1}}
+    set_fact:
+      nr: {{index+1}}
+- name: Create {{component.name}} {{index+1}}
+  import_playbook: {{component.name}}/ssh.yml
+{% endfor %}
+{% endif %}
+{% endif %}{% endif %}{% endif %}{% endfor %}`
+
+//------------------------------------------------------------------------------
+
+templates['Servers (ssh all2)'] = `#!/usr/bin/env bash
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.user != '' %}
+{% if component.max == 1 %}
+$SCRIPTPATH/{{component.name}}/ssh.yml &
+{% else %}
+{% for index in range(component.max) %}
+$SCRIPTPATH/{{component.name}}/ssh.yml --extra-vars "nr={{index+1}}" &
+{% endfor %}
+{% endif %}
+{% endif %}{% endif %}{% endif %}{% endfor %}
+wait`
+
+//------------------------------------------------------------------------------
+
+templates['Servers (ssh)'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.user != '' %}
+----- {{component.name}} -----
+#!/usr/bin/env ansible-playbook
+---
+- name: Determine index of server
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Set index I/II
+      set_fact:
+        host: "{{component.name + '-' + '{{ nr }}' }}"
+      when: nr is defined
+
+    - name: Set index II/II
+      set_fact:
+        host: "{{component.name}}"
+      when: nr is not defined
+
+- name: Update ssh keys for server '{{component.name}}'
+  hosts: "{{ "{{ hostvars['localhost']['host'] }}" | safe }}"
+  gather_facts: false
+  tasks:
+    - name: Update authorized keys file for server '{{component.name}}'
+      authorized_key:
+        user: '{{ component.user }}'
+        key: "{{ '{{ item }}' }}"
+        state: present
+        exclusive: True
+      become: yes
+      with_file:
+        - ../../../repository/authorized_keys
+{% endif %}{% endif %}{% endif %}{% endfor %}`
+
+//------------------------------------------------------------------------------
+
 templates['Router (create)'] = `{% for component in components %}{% if component.placement == 'ROUTER' %}
 ----- {{component.name}} -----
 #!/usr/bin/env ansible-playbook

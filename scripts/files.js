@@ -93,12 +93,12 @@ Host *
 files['inventory'] = `localhost ansible_connection=local
 
 [servers]
-{% for server_name in server_names %}{% if server_name != "jumphost" %}
+{% for server_name in server_names %}
 {{server_name}}
 {% endif %}{% endfor %}
 
 [ssh_servers]
-{% for server_name in ssh_server_names %}{% if server_name != "jumphost" %}
+{% for server_name in ssh_server_names %}
 {{server_name}}
 {% endif %}{% endfor %}`
 
