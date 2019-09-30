@@ -87,35 +87,35 @@ Vue.component(
         servers.file("define_security.yml", txt, {unixPermissions: "755"})
 
         var txt = render(model, "Servers (define security all2)")
-        servers.file("define_security2.yml", txt, {unixPermissions: "755"})
+        servers.file("define_security.sh", txt, {unixPermissions: "755"})
 
         // export servers undefine security all file
         var txt = render(model, "Servers (undefine security all)")
         servers.file("undefine_security.yml", txt, {unixPermissions: "755"})
 
         var txt = render(model, "Servers (undefine security all2)")
-        servers.file("undefine_security2.yml", txt, {unixPermissions: "755"})
+        servers.file("undefine_security.sh", txt, {unixPermissions: "755"})
 
         // export servers create all file
         var txt = render(model, "Servers (create all)")
         servers.file("create.yml", txt, {unixPermissions: "755"})
 
         var txt = render(model, "Servers (create all2)")
-        servers.file("create2.yml", txt, {unixPermissions: "755"})
+        servers.file("create.sh", txt, {unixPermissions: "755"})
 
         // export servers delete all file
         var txt = render(model, "Servers (delete all)")
         servers.file("delete.yml", txt, {unixPermissions: "755"})
 
         var txt = render(model, "Servers (delete all2)")
-        servers.file("delete2.yml", txt, {unixPermissions: "755"})
+        servers.file("delete.sh", txt, {unixPermissions: "755"})
 
         // export servers ssh keys update file
         var txt = render(model, "Servers (ssh all)")
         servers.file("ssh.yml", txt, {unixPermissions: "755"})
 
         var txt = render(model, "Servers (ssh all2)")
-        servers.file("ssh2.yml", txt, {unixPermissions: "755"})
+        servers.file("ssh.sh", txt, {unixPermissions: "755"})
 
         // export server security definition files
         var txt  = render(model, "Servers (define security)")
