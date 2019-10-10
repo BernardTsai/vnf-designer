@@ -489,7 +489,7 @@ templates['Servers (define security all)'] = `#!/usr/bin/env ansible-playbook
 
 //------------------------------------------------------------------------------
 
-templates['Servers (define security all2)'] = `#!/usr/bin/env ansible-playbook
+templates['Servers (define security all2)'] = `#!/usr/bin/env bash
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 {% if component.max == 1 %}
@@ -513,7 +513,7 @@ templates['Servers (undefine security all)'] = `#!/usr/bin/env ansible-playbook
 
 //------------------------------------------------------------------------------
 
-templates['Servers (undefine security all2)'] = `#!/usr/bin/env ansible-playbook
+templates['Servers (undefine security all2)'] = `#!/usr/bin/env bash
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 {% if component.max == 1 %}
