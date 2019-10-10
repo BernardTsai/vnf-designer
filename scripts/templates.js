@@ -414,6 +414,7 @@ templates['Servers (define security)'] = `{% for component in components %}{% if
       remote_ip_prefix: "{{ '{{item.remote_ip_prefix}}' }}"
       direction:        ingress
       validate_certs:   no
+    ignore_errors:      yes
     loop: "{{ '{{secgroup.secgroup.security_group_rules}}' }}"
     when: item.direction == "ingress"
 
@@ -428,7 +429,7 @@ templates['Servers (define security)'] = `{% for component in components %}{% if
       remote_ip_prefix: "{{ '{{item.remote_ip_prefix}}' }}"
       direction:        ingress
       validate_certs:   no
-      ignore_errors:    yes
+    ignore_errors:      yes
     loop:
     - {protocol: icmp, port_range_min: 0, port_range_max: 255, remote_ip_prefix: 0.0.0.0/0}
 {% for service in component.services %}{% if interface.network == service.network %}
