@@ -493,13 +493,7 @@ templates['Servers (define security all)'] = `#!/usr/bin/env ansible-playbook
 templates['Servers (define security all2)'] = `#!/usr/bin/env bash
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
-{% if component.max == 1 %}
 $SCRIPTPATH/{{component.name}}/define_security.yml &
-{% else %}
-{% for index in range(component.max) %}
-$SCRIPTPATH/{{component.name}}/define_security.yml --extra-vars "nr= {{index+1}}" &
-{% endfor %}
-{% endif %}
 {% endif %}{% endif %}{% endfor %}
 wait`
 
@@ -517,13 +511,7 @@ templates['Servers (undefine security all)'] = `#!/usr/bin/env ansible-playbook
 templates['Servers (undefine security all2)'] = `#!/usr/bin/env bash
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
-{% if component.max == 1 %}
 $SCRIPTPATH/{{component.name}}/undefine_security.yml &
-{% else %}
-{% for index in range(component.max) %}
-$SCRIPTPATH/{{component.name}}/undefine_security.yml --extra-vars "nr= {{index+1}}" &
-{% endfor %}
-{% endif %}
 {% endif %}{% endif %}{% endfor %}
 wait`
 
