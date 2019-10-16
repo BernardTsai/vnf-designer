@@ -311,7 +311,7 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
     - name: Define ssh servers
       set_fact:
         ssh_server_names:
-{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.name != '' %}
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.user != '' %}
 {% if component.max == 1 %}
           - {{component.name}}
 {% else %}
