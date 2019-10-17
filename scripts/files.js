@@ -107,3 +107,19 @@ files['inventory'] = `localhost ansible_connection=local
 files['default_inventory'] = `localhost ansible_connection=local `
 
 //------------------------------------------------------------------------------
+
+files['setup'] = `#!/usr/bin/env bash
+
+ROOT="."
+
+if [ -f "$ROOT/setup.sh" ]; then
+  chmod a+x $ROOT/networks/*.yml
+  chmod a+x $ROOT/servers/*.sh
+  chmod a+x $ROOT/servers/*.yml
+  find  $ROOT/servers -name '*.yml' -type f | xargs chmod a+x
+  find  $ROOT/router  -name '*.yml' -type f | xargs chmod a+x
+else
+  echo "Script should be sourced within the same directory"
+fi`
+
+//------------------------------------------------------------------------------

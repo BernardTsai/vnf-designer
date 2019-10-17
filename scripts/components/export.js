@@ -26,6 +26,10 @@ Vue.component(
       downloadArchive: function(){
         var zip = new JSZip();
 
+        // export readme.md
+        var txt = render(model, "readme")
+        zip.file("README.md", txt)
+
         // export model
         var txt = jsyaml.safeDump(model)
         zip.file("model.yml", txt);
@@ -45,6 +49,9 @@ Vue.component(
         // export prequisites file
         var txt = render(model, "Prequisites")
         zip.file("prequisites.txt", txt)
+
+        // export setup.sh
+        zip.file("setup.sh", files['setup'])
 
         // construct folders
         var tenant    = zip.folder("tenant")

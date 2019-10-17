@@ -1023,3 +1023,48 @@ Images:
 * {{(image + "                               ") | truncate(32, true, "") }}: {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %} {{ component.name }}{% endif %}{% endif %}{% endfor %}\n
 {% endfor %}
 `
+
+//------------------------------------------------------------------------------
+
+templates['readme'] = `
+README
+======
+
+VNF:     {{vnf}}
+Version: {{version}}
+Tenant:  {{tenant.name}}
+
+Prequisites
+-----------
+- access to OpenStack API
+- ansible installed
+- openstack client installed
+- repository directory (next to the directory containing this readme):
+  - id_rsa (private key for accessing the virtual machines)
+  - openstack.crt (certificate file of OpenStack API)
+  - authorized_keys (file with all public keys to be uploaded to VMs)
+
+Preparation
+-----------
+- source ./setup.sh
+
+Usage
+-----
+
+create, delete and determine status of networks:
+- ./networks/create.yml
+- ./networks/delete.yml
+- ./networks/status.yml
+
+create, delete security policies:
+- ./servers/define_security.sh
+- ./servers/undefine_security.sh
+
+create, delete and determine status of servers:
+- ./servers/create.sh
+- ./servers/delete.sh
+- ./servers/status.yml
+
+distribute ssh keys to servers:
+- ./servers/ssh.sh
+`
