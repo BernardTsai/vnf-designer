@@ -11,7 +11,7 @@ Vue.component(
       download: function() {
         var text     = document.getElementById("export").value
         var element  = document.createElement('a')
-        var filename = "descriptor.txt"
+        var filename = this.view.export == "Canonical" ? "model-V" + this.model.version + ".yml" : "descriptor.txt"
 
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
         element.setAttribute('download', filename);
@@ -202,7 +202,7 @@ Vue.component(
           var element  = document.createElement('a');
 
           element.setAttribute('href', URL.createObjectURL(content) )
-          element.setAttribute('download', "model-" + model.version + ".zip");
+          element.setAttribute('download', "model-V" + model.version + ".zip");
 
           element.style.display = 'none';
           document.body.appendChild(element);
