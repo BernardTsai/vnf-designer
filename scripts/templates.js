@@ -6,6 +6,7 @@ vnf:        {{vnf}}
 version:    {{version}}
 tenant:
   name:          "{{tenant.name}}"
+  prefix:        "{{tenant.prefix}}"
   auth:
     username:    "{{tenant.auth.username}}"
     password:    "{{tenant.auth.password}}"
@@ -182,14 +183,14 @@ templates['Networks (create)'] = `#!/usr/bin/env ansible-playbook
   - name: Create {{network.name}} network
     os_network:
       state:          present
-      name:           {{network.name}}
+      name:           {{tenant.prefix}}{{network.name}}
       validate_certs: no
 
   - name: Create {{network.name}} subnet
     os_subnet:
       state:                 present
-      network_name:          {{network.name}}
-      name:                  {{network.name}}_subnet
+      network_name:          {{tenant.prefix}}{{network.name}}
+      name:                  {{tenant.prefix}}{{network.name}}_subnet
       cidr:                  {{network.ipv4}}
       allocation_pool_start: {{network.ipv4start}}
       allocation_pool_end:   {{network.ipv4end}}
@@ -218,7 +219,7 @@ templates['Networks (delete)'] = `#!/usr/bin/env ansible-playbook
         validate_certs: no
       loop:
 {% for network in networks %}{% if network.external != "true" %}
-      - {{network.name}}
+      - {{tenant.prefix}}{{network.name}}
 {% endif %}{% endfor %}
 
     - name: Delete networks
@@ -228,7 +229,7 @@ templates['Networks (delete)'] = `#!/usr/bin/env ansible-playbook
         validate_certs: no
       loop:
 {% for network in networks %}{% if network.external != "true" %}
-      - {{network.name}}
+      - {{tenant.prefix}}{{network.name}}
 {% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
@@ -249,7 +250,7 @@ templates['Networks (status)'] = `#!/usr/bin/env ansible-playbook
       set_fact:
         network_names:
 {% for network in networks %}
-          - {{network.name}}
+          - {{tenant.prefix}}{{network.name}}
 {% endfor %}
 
     - name: Collect network information
@@ -300,10 +301,10 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
         server_names:
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 {% if component.max == 1 %}
-          - {{component.name}}
+          - {{tenant.prefix}}{{component.name}}
 {% else %}
 {% for server_index in range(1,1+component.max,1) %}
-          - {{component.name}}-{{server_index}}
+          - {{tenant.prefix}}{{component.name}}-{{server_index}}
 {% endfor %}
 {% endif %}
 {% endif %}{% endif %}{% endfor %}
@@ -313,10 +314,10 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
         ssh_server_names:
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.user != '' %}
 {% if component.max == 1 %}
-          - {{component.name}}
+          - {{tenant.prefix}}{{component.name}}
 {% else %}
 {% for server_index in range(1,1+component.max,1) %}
-          - {{component.name}}-{{server_index}}
+          - {{tenant.prefix}}{{component.name}}-{{server_index}}
 {% endfor %}
 {% endif %}
 {% endif %}{% endif %}{% endif %}{% endfor %}
@@ -328,10 +329,10 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 {% for interface in component.interfaces %}
 {% if component.max == 1 %}
-          - {{component.name}}_{{interface.network}}
+          - {{tenant.prefix}}{{component.name}}_{{interface.network}}
 {% else %}
 {% for server_index in range(1,component.max,1) %}
-          - {{component.name}}-{{server_index}}_{{interface.network}}
+          - {{tenant.prefix}}{{component.name}}-{{server_index}}_{{interface.network}}
 {% endfor %}
 {% endif %}
 {% endfor %}
@@ -379,7 +380,7 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
 //------------------------------------------------------------------------------
 
 templates['Servers (define security)'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
------ {{component.name}} -----
+----- {{tenant.prefix}}{{component.name}} -----
 #!/usr/bin/env ansible-playbook
 ---
 - name: Create security groups for ports of server {{component.name}}
@@ -394,20 +395,20 @@ templates['Servers (define security)'] = `{% for component in components %}{% if
   tasks:
 
 {% for interface in component.interfaces %}
-  # ----- security group for {{component.name}} interface {{interface.network}} -----
-  - name: Create {{component.name}}_{{interface.network}} security group
+  # ----- security group for {{tenant.prefix}}{{component.name}} interface {{tenant.prefix}}{{interface.network}} -----
+  - name: Create {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{interface.network}} security group
     os_security_group:
       state:          present
-      name:           {{component.name}}_{{interface.network}}
-      description:    Security group for the {{component.name}} {{interface.network}} interface.
+      name:           {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{interface.network}}
+      description:    Security group for the {{tenant.prefix}}{{component.name}} {{tenant.prefix}}{{interface.network}} interface.
       validate_certs: no
     register: secgroup
 
-  # ----- reset all ingress security rules for {{component.name}} interface {{interface.network}} -----
-  - name: Delete all ingress {{component.name}}_{{interface.network}} security group rules
+  # ----- reset all ingress security rules for {{tenant.prefix}}{{component.name}} interface {{tenant.prefix}}{{interface.network}} -----
+  - name: Delete all ingress {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{interface.network}} security group rules
     os_security_group_rule:
       state:            absent
-      security_group:   {{component.name}}_{{interface.network}}
+      security_group:   {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{interface.network}}
       protocol:         "{{ '{{item.protocol}}' }}"
       port_range_min:   "{{ '{{item.port_range_min}}' }}"
       port_range_max:   "{{ '{{item.port_range_max}}' }}"
@@ -418,11 +419,11 @@ templates['Servers (define security)'] = `{% for component in components %}{% if
     loop: "{{ '{{secgroup.secgroup.security_group_rules}}' }}"
     when: item.direction == "ingress"
 
-  # ----- security group rules for {{component.name}} interface {{interface.network}} -----
-  - name: Create {{component.name}}_{{interface.network}} security group rules
+  # ----- security group rules for {{tenant.prefix}}{{component.name}} interface {{tenant.prefix}}{{interface.network}} -----
+  - name: Create {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{interface.network}} security group rules
     os_security_group_rule:
       state:            present
-      security_group:   {{component.name}}_{{interface.network}}
+      security_group:   {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{interface.network}}
       protocol:         "{{ '{{item.protocol}}' }}"
       port_range_min:   "{{ '{{item.port_range_min}}' }}"
       port_range_max:   "{{ '{{item.port_range_max}}' }}"
@@ -453,10 +454,10 @@ templates['Servers (define security)'] = `{% for component in components %}{% if
 //------------------------------------------------------------------------------
 
 templates['Servers (undefine security)'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
------ {{component.name}} -----
+----- {{tenant.prefix}}{{component.name}} -----
 #!/usr/bin/env ansible-playbook
 ---
-- name: Delete security groups for ports of server {{component.name}}
+- name: Delete security groups for ports of server {{tenant.prefix}}{{component.name}}
   hosts: localhost
   connection: local
   gather_facts: false
@@ -468,12 +469,12 @@ templates['Servers (undefine security)'] = `{% for component in components %}{% 
   tasks:
 
 {% for interface in component.interfaces %}
-  # ----- security group for {{component.name}} interface {{interface.network}} -----
-  - name: Delete {{component.name}}_{{interface.network}} security group
+  # ----- security group for {{component.name}} interface {{tenant.prefix}}{{interface.network}} -----
+  - name: Delete {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{interface.network}} security group
     os_security_group:
       state:          absent
-      name:           {{component.name}}_{{interface.network}}
-      description:    Security group for the {{component.name}} {{interface.network}} interface.
+      name:           {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{interface.network}}
+      description:    Security group for the {{tenant.prefix}}{{component.name}} {{tenant.prefix}}{{interface.network}} interface.
       validate_certs: no
 
 {% endfor %}
@@ -484,8 +485,8 @@ templates['Servers (undefine security)'] = `{% for component in components %}{% 
 templates['Servers (define security all)'] = `#!/usr/bin/env ansible-playbook
 ---
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
-- name: Create {{component.name}}
-  import_playbook: {{component.name}}/define_security.yml
+- name: Create {{tenant.prefix}}{{component.name}}
+  import_playbook: {{tenant.prefix}}{{component.name}}/define_security.yml
 {% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
@@ -493,7 +494,7 @@ templates['Servers (define security all)'] = `#!/usr/bin/env ansible-playbook
 templates['Servers (define security all2)'] = `#!/usr/bin/env bash
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
-$SCRIPTPATH/{{component.name}}/define_security.yml &
+$SCRIPTPATH/{{tenant.prefix}}{{component.name}}/define_security.yml &
 {% endif %}{% endif %}{% endfor %}
 wait`
 
@@ -502,8 +503,8 @@ wait`
 templates['Servers (undefine security all)'] = `#!/usr/bin/env ansible-playbook
 ---
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
-- name: Create {{component.name}}
-  import_playbook: {{component.name}}/undefine_security.yml
+- name: Create {{tenant.prefix}}{{component.name}}
+  import_playbook: {{tenant.prefix}}{{component.name}}/undefine_security.yml
 {% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
@@ -511,7 +512,7 @@ templates['Servers (undefine security all)'] = `#!/usr/bin/env ansible-playbook
 templates['Servers (undefine security all2)'] = `#!/usr/bin/env bash
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
-$SCRIPTPATH/{{component.name}}/undefine_security.yml &
+$SCRIPTPATH/{{tenant.prefix}}{{component.name}}/undefine_security.yml &
 {% endif %}{% endif %}{% endfor %}
 wait`
 
@@ -529,8 +530,8 @@ templates['Servers (create all)'] = `#!/usr/bin/env ansible-playbook
   - name: Set nr = ""
     set_fact:
       nr: ""
-- name: Create {{component.name}}
-  import_playbook: {{component.name}}/create.yml
+- name: Create {{tenant.prefix}}{{component.name}}
+  import_playbook: {{tenant.prefix}}{{component.name}}/create.yml
 {% else %}
 {% for index in range(component.max) %}
 - name: Set nr {{index+1}}
@@ -541,8 +542,8 @@ templates['Servers (create all)'] = `#!/usr/bin/env ansible-playbook
   - name: Set nr = {{index+1}}
     set_fact:
       nr: {{index+1}}
-- name: Create {{component.name}} {{index+1}}
-  import_playbook: {{component.name}}/create.yml
+- name: Create {{tenant.prefix}}{{component.name}} {{index+1}}
+  import_playbook: {{tenant.prefix}}{{component.name}}/create.yml
 {% endfor %}
 {% endif %}
 {% endif %}{% endif %}{% endfor %}`
@@ -553,10 +554,10 @@ templates['Servers (create all2)'] = `#!/usr/bin/env bash
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 {% if component.max == 1 %}
-$SCRIPTPATH/{{component.name}}/create.yml &
+$SCRIPTPATH/{{tenant.prefix}}{{component.name}}/create.yml &
 {% else %}
 {% for index in range(component.max) %}
-$SCRIPTPATH/{{component.name}}/create.yml --extra-vars "nr={{index+1}}" &
+$SCRIPTPATH/{{tenant.prefix}}{{component.name}}/create.yml --extra-vars "nr={{index+1}}" &
 {% endfor %}
 {% endif %}
 {% endif %}{% endif %}{% endfor %}
@@ -576,8 +577,8 @@ templates['Servers (delete all)'] = `#!/usr/bin/env ansible-playbook
   - name: Set nr = ""
     set_fact:
       nr: ""
-- name: Create {{component.name}}
-  import_tasks: {{component.name}}/delete.yml
+- name: Delete {{tenant.prefix}}{{component.name}}
+  import_tasks: {{tenant.prefix}}{{component.name}}/delete.yml
 {% else %}
 {% for index in range(component.max) %}
 - name: Set nr {{index+1}}
@@ -588,7 +589,7 @@ templates['Servers (delete all)'] = `#!/usr/bin/env ansible-playbook
   - name: Set nr = {{index+1}}
     set_fact:
       nr: {{index+1}}
-- name: Delete {{component.name}} {{index+1}}
+- name: Delete {{tenant.prefix}}{{component.name}} {{index+1}}
   import_playbook: {{component.name}}/delete.yml
 {% endfor %}
 {% endif %}
@@ -600,10 +601,10 @@ templates['Servers (delete all2)'] = `#!/usr/bin/env bash
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 {% if component.max == 1 %}
-$SCRIPTPATH/{{component.name}}/delete.yml &
+$SCRIPTPATH/{{tenant.prefix}}{{component.name}}/delete.yml &
 {% else %}
 {% for index in range(component.max) %}
-$SCRIPTPATH/{{component.name}}/delete.yml --extra-vars "nr={{index+1}}" &
+$SCRIPTPATH/{{tenant.prefix}}{{component.name}}/delete.yml --extra-vars "nr={{index+1}}" &
 {% endfor %}
 {% endif %}
 {% endif %}{% endif %}{% endfor %}
@@ -612,10 +613,10 @@ wait`
 //------------------------------------------------------------------------------
 
 templates['Servers (create)'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
------ {{component.name}} -----
+----- {{tenant.prefix}}{{component.name}} -----
 #!/usr/bin/env ansible-playbook
 ---
-- name: Create server {{component.name}}
+- name: Create server {{tenant.prefix}}{{component.name}}
   hosts: localhost
   connection: local
   gather_facts: false
@@ -634,15 +635,15 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
       index: "{{ '{{' }} (idx == '') | ternary( '', '-' + idx) {{ '}}' }}"
 
 {% for interface in component.interfaces %}
-  # ----- {{interface.network}} port for {{component.name}} -----
-  - name: Create {{interface.network}} port for {{component.name}}
+  # ----- {{interface.network}} port for {{tenant.prefix}}{{component.name}} -----
+  - name: Create {{interface.network}} port for {{tenant.prefix}}{{component.name}}
     os_port:
       state:          present
-      name:           "{{component.name}}{{ '{{ index }}' }}_{{interface.network}}"
-      network:        "{{interface.network}}"
+      name:           "{{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}_{{tenant.prefix}}{{interface.network}}"
+      network:        "{{tenant.prefix}}{{interface.network}}"
       validate_certs: no
       security_groups:
-      - "{{component.name}}_{{interface.network}}"
+      - "{{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{interface.network}}"
 {% if interface.attributes|allowed|length > 0 %}
       allowed_address_pairs:
 {% for allowed in interface.attributes|allowed %}
@@ -660,7 +661,7 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
   - name: Create virtual machine for {{component.name}} server
     os_server:
       state:          present
-      name:           {{component.name}}{{ '{{ index }}' }}
+      name:           {{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}
       flavor:         "{{component.flavor}}"
       image:          "{{component.image}}"
       key_name:       fiveg_key
@@ -670,10 +671,10 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
       validate_certs: no
       nics:
 {% for interface in component.interfaces %}
-        - port-name: {{component.name}}{{ '{{ index }}' }}_{{interface.network}}
+        - port-name: {{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}_{{tenant.prefix}}{{interface.network}}
 {% endfor %}
       meta:
-       hostname: {{component.name}}{{ '{{ index }}' }}
+       hostname: {{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}
 {% if component.userdata != "" %}
       userdata: |
         {{ component.userdata | indent(8) | safe }}
@@ -681,16 +682,16 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
 
 {% if component.name == "jumphost" %}{% if tenant.jumphost != "" %}
   # ----- floating IP for jumphost -----
-  - name: Determine jumphost_oam port information
+  - name: Determine {{tenant.prefix}}jumphost_{{tenant.prefix}}oam port information
     os_port_facts:
-      port:           "jumphost_oam"
+      port:           "{{tenant.prefix}}jumphost_{{tenant.prefix}}oam"
       validate_certs: no
     register: jumphost_oam_facts
 
   - name: Assign floating IP to jumphost
     os_floating_ip:
       state:               present
-      server:              jumphost
+      server:              {{tenant.prefix}}jumphost
       floating_ip_address: "{{tenant.jumphost}}"
       fixed_address:       "{{ '{{' }} jumphost_oam_facts.ansible_facts.openstack_ports[0].fixed_ips[0].ip_address {{ '}}' }}"
       validate_certs:      no
@@ -698,20 +699,20 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
 {% endif %}{% endif %}
 
 {% for volume in component.volumes %}
-  # ----- {{volume.name}} volume for {{component.name}} -----
-  - name: Create {{volume.name}} volume for {{component.name}}
+  # ----- {{volume.name}} volume for {{tenant.prefix}}{{component.name}} -----
+  - name: Create {{volume.name}} volume for {{tenant.prefix}}{{component.name}}
     os_volume:
       state:          present
-      name:           "{{component.name}}{{ '{{ index }}' }}_{{volume.name}}"
+      name:           "{{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}_{{volume.name}}"
       size:           {{volume.size}}
-      display_name:   "{volume.name}} volume for {{component.name}}"
+      display_name:   "{{volume.name}} volume for {{tenant.prefix}}{{component.name}}"
       validate_certs: no
 
-  - name: Attach volume {{volume.name}} to {{component.name}}
+  - name: Attach volume {{volume.name}} to {{tenant.prefix}}{{component.name}}
     os_server_volume:
       state:          present
-      server:         "{{component.name}}{{ '{{ index }}' }}"
-      volume:         "{{component.name}}{{ '{{ index }}' }}_{{volume.name}}"
+      server:         "{{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}"
+      volume:         "{{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}_{{volume.name}}"
       validate_certs: no
 
 {% endfor %}
@@ -721,7 +722,7 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
 //------------------------------------------------------------------------------
 
 templates['Servers (delete)'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
------ {{component.name}} -----
+----- {{tenant.prefix}}{{component.name}} -----
 #!/usr/bin/env ansible-playbook
 ---
 - name: Delete server {{component.name}}
@@ -743,38 +744,38 @@ templates['Servers (delete)'] = `{% for component in components %}{% if componen
       index: "{{ '{{' }} (idx == '') | ternary( '', '-' + idx) {{ '}}' }}"
 
 {% for interface in component.interfaces %}
-  # ----- {{interface.network}} port for {{component.name}} -----
-  - name: Delete {{interface.network}} port for {{component.name}}
+  # ----- {{tenant.prefix}}{{interface.network}} port for {{tenant.prefix}}{{component.name}} -----
+  - name: Delete {{tenant.prefix}}{{interface.network}} port for {{tenant.prefix}}{{component.name}}
     os_port:
       state:          absent
-      name:           "{{component.name}}{{ '{{ index }}' }}_{{interface.network}}"
-      network:        "{{interface.network}}"
+      name:           "{{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}_{{tenant.prefix}}{{interface.network}}"
+      network:        "{{tenant.prefix}}{{interface.network}}"
       validate_certs: no
 
 {% endfor %}
 
 {% for volume in component.volumes %}
-  # ----- {{volume.name}} volume for {{component.name}} -----
-  - name: Detach volume {{volume.name}} to {{component.name}}
+  # ----- {{volume.name}} volume for {{tenant.prefix}}{{component.name}} -----
+  - name: Detach volume {{volume.name}} to {{tenant.prefix}}{{component.name}}
     os_server_volume:
       state:          absent
-      server:         "{{component.name}}{{ '{{ index }}' }}"
-      volume:         "{{component.name}}{{ '{{ index }}' }}_{{volume.name}}"
+      server:         "{{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}"
+      volume:         "{{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}_{{volume.name}}"
       validate_certs: no
 
-  - name: Create {{volume.name}} volume for {{component.name}}
+  - name: Delete {{volume.name}} volume for {{tenant.prefix}}{{component.name}}
     os_volume:
       state:          absent
-      name:           "{{component.name}}{{ '{{ index }}' }}_{{volume.name}}"
+      name:           "{{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}_{{volume.name}}"
       validate_certs: no
 
 {% endfor %}
 
-  # ----- {{component.name}} virtual machine -----
-  - name: Delete virtual machine for {{component.name}} server
+  # ----- {{tenant.prefix}}{{component.name}} virtual machine -----
+  - name: Delete virtual machine for {{tenant.prefix}}{{component.name}} server
     os_server:
       state:          absent
-      name:           {{component.name}}{{ '{{ index }}' }}
+      name:           {{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}
       validate_certs: no
 
 {% endif %}{% endif %}{% endfor %}`
@@ -793,8 +794,8 @@ templates['Servers (ssh all)'] = `#!/usr/bin/env ansible-playbook
   - name: Set nr = ""
     set_fact:
       nr: ""
-- name: Create {{component.name}}
-  import_playbook: {{component.name}}/create.yml
+- name: SSH for {{tenant.prefix}}{{component.name}}
+  import_playbook: {{tenant.prefix}}{{component.name}}/ssh.yml
 {% else %}
 {% for index in range(component.max) %}
 - name: Set nr {{index+1}}
@@ -805,8 +806,8 @@ templates['Servers (ssh all)'] = `#!/usr/bin/env ansible-playbook
   - name: Set nr = {{index+1}}
     set_fact:
       nr: {{index+1}}
-- name: Create {{component.name}} {{index+1}}
-  import_playbook: {{component.name}}/ssh.yml
+- name: SSH for {{tenant.prefix}}{{component.name}} {{index+1}}
+  import_playbook: {{tenant.prefix}}{{component.name}}/ssh.yml
 {% endfor %}
 {% endif %}
 {% endif %}{% endif %}{% endif %}{% endfor %}`
@@ -817,10 +818,10 @@ templates['Servers (ssh all2)'] = `#!/usr/bin/env bash
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.user != '' %}
 {% if component.max == 1 %}
-$SCRIPTPATH/{{component.name}}/ssh.yml &
+$SCRIPTPATH/{{tenant.prefix}}{{component.name}}/ssh.yml &
 {% else %}
 {% for index in range(component.max) %}
-$SCRIPTPATH/{{component.name}}/ssh.yml --extra-vars "nr={{index+1}}" &
+$SCRIPTPATH/{{tenant.prefix}}{{component.name}}/ssh.yml --extra-vars "nr={{index+1}}" &
 {% endfor %}
 {% endif %}
 {% endif %}{% endif %}{% endif %}{% endfor %}
@@ -829,7 +830,7 @@ wait`
 //------------------------------------------------------------------------------
 
 templates['Servers (ssh)'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.user != '' %}
------ {{component.name}} -----
+----- {{tenant.prefix}}{{component.name}} -----
 #!/usr/bin/env ansible-playbook
 ---
 - name: Determine index of server
@@ -838,19 +839,19 @@ templates['Servers (ssh)'] = `{% for component in components %}{% if component.p
   tasks:
     - name: Set index I/II
       set_fact:
-        host: "{{component.name + '-' + '{{ nr }}' }}"
+        host: "{{tenant.prefix}}{{component.name + '-' + '{{ nr }}' }}"
       when: nr is defined
 
     - name: Set index II/II
       set_fact:
-        host: "{{component.name}}"
+        host: "{{tenant.prefix}}{{component.name}}"
       when: nr is not defined
 
-- name: Update ssh keys for server '{{component.name}}'
+- name: Update ssh keys for server '{{tenant.prefix}}{{component.name}}'
   hosts: "{{ "{{ hostvars['localhost']['host'] }}" | safe }}"
   gather_facts: false
   tasks:
-    - name: Update authorized keys file for server '{{component.name}}'
+    - name: Update authorized keys file for server '{{tenant.prefix}}{{component.name}}'
       authorized_key:
         user: '{{ component.user }}'
         key: "{{ '{{ item }}' }}"
@@ -864,7 +865,7 @@ templates['Servers (ssh)'] = `{% for component in components %}{% if component.p
 //------------------------------------------------------------------------------
 
 templates['Router (create)'] = `{% for component in components %}{% if component.placement == 'ROUTER' %}
------ {{component.name}} -----
+----- {{tenant.prefix}}{{component.name}} -----
 #!/usr/bin/env ansible-playbook
 ---
 - name: Create router {{component.name}}
@@ -878,15 +879,15 @@ templates['Router (create)'] = `{% for component in components %}{% if component
   environment: "{{ '{{env_vars}}' }}"
   tasks:
 
-  # ----- {{component.name}} router -----
-  - name: Create router {{component.name}}
+  # ----- {{tenant.prefix}}{{component.name}} router -----
+  - name: Create router {{tenant.prefix}}{{component.name}}
     os_router:
       state:          present
-      name:           {{component.name}}
+      name:           {{tenant.prefix}}{{component.name}}
       validate_certs: no
       interface:
 {% for interface in component.interfaces %}
-      - subnet: {{interface.network}}_subnet
+      - subnet: {{tenant.prefix}}{{interface.network}}_subnet
 {% endfor %}
 
 
@@ -895,7 +896,7 @@ templates['Router (create)'] = `{% for component in components %}{% if component
 //------------------------------------------------------------------------------
 
 templates['Router (delete)'] = `{% for component in components %}{% if component.placement == 'ROUTER' %}
------ {{component.name}} -----
+----- {{tenant.prefix}}{{component.name}} -----
 #!/usr/bin/env ansible-playbook
 ---
 - name: Create router {{component.name}}
@@ -909,15 +910,15 @@ templates['Router (delete)'] = `{% for component in components %}{% if component
   environment: "{{ '{{env_vars}}' }}"
   tasks:
 
-  # ----- {{component.name}} router -----
-  - name: Create router {{component.name}}
+  # ----- {{tenant.prefix}}{{component.name}} router -----
+  - name: Delete router {{tenant.prefix}}{{component.name}}
     os_router:
       state:          absent
-      name:           {{component.name}}
+      name:           {{tenant.prefix}}{{component.name}}
       validate_certs: no
       interface:
 {% for interface in component.interfaces %}
-      - subnet: {{interface.network}}_subnet
+      - subnet: {{tenant.prefix}}{{interface.network}}_subnet
 {% endfor %}
 
 
@@ -939,11 +940,11 @@ templates['ssh'] = `#!/usr/bin/env ansible-playbook
 ---
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.user != '' %}
 {% if component.max == 1 %}
-- name: Update ssh keys for server {{component.name}}
-  hosts: '{{component.name}}'
+- name: Update ssh keys for server {{tenant.prefix}}{{component.name}}
+  hosts: '{{tenant.prefix}}{{component.name}}'
   gather_facts: false
   tasks:
-    - name: Update authorized keys file for server {{component.name}}
+    - name: Update authorized keys file for server {{tenant.prefix}}{{component.name}}
       authorized_key:
         user: '{{ component.user }}'
         key: "{{ '{{ item }}' }}"
@@ -955,11 +956,11 @@ templates['ssh'] = `#!/usr/bin/env ansible-playbook
 
 {% else %}
 {% for server_index in range(1,1+component.max,1) %}
-- name: Update ssh keys for server {{component.name}}-{{server_index}}
-  hosts: '{{component.name}}-{{server_index}}'
+- name: Update ssh keys for server {{tenant.prefix}}{{component.name}}-{{server_index}}
+  hosts: '{{tenant.prefix}}{{component.name}}-{{server_index}}'
   gather_facts: false
   tasks:
-    - name: Update authorized keys file for server {{component.name}}-{{server_index}}
+    - name: Update authorized keys file for server {{tenant.prefix}}{{component.name}}-{{server_index}}
       authorized_key:
         user: '{{ component.user }}'
         key: "{{ '{{ item }}' }}"
@@ -1033,6 +1034,7 @@ README
 VNF:     {{vnf}}
 Version: {{version}}
 Tenant:  {{tenant.name}}
+Prefix:  {{tenant.prefix}}
 
 Prequisites
 -----------

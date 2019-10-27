@@ -18,8 +18,10 @@ var schema = {
     "tenant": {
       "description": "The tenant information",
       "type":        "object",
-      "required":    ["auth","service"],
+      "required":    ["name","auth","service"],
       "properties": {
+        "name":   { "type": "string", "description": "name of the tenant" },
+        "prefix": { "type": "string", "description": "prefix for tenant resources" },
 
         "auth": {
           "description": "The authentication information",

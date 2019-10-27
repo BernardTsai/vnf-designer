@@ -355,6 +355,10 @@ Vue.component( 'tenantform',
         <input v-model="model.tenant.name" id="tenant_name" name="tenant_name" required>
       </div>
       <div class="line">
+        <label for="prefix">Prefix:</label>
+        <input v-model="model.tenant.prefix" id="tenant_prefix" name="tenant_prefix" required>
+      </div>
+      <div class="line">
         <label for="tenant_auth_username">Username:</label>
         <input v-model="model.tenant.auth.username" id="tenant_auth_username" name="tenant_auth_username" required>
       </div>
