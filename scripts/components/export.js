@@ -11,7 +11,7 @@ Vue.component(
       download: function() {
         var text     = document.getElementById("export").value
         var element  = document.createElement('a')
-        var filename = this.view.export == "Canonical" ? "model-V" + this.model.version + ".yml" : "descriptor.txt"
+        var filename = this.view.export == "Canonical" ? this.model.vnf + "-V" + this.model.version + ".yml" : "descriptor.txt"
 
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
         element.setAttribute('download', filename);
@@ -66,10 +66,10 @@ Vue.component(
         var router_folders = {}
         for (var c of model.components) {
           if (c.placement != "OTHER" && c.placement != "ROUTER" ) {
-            server_folders[c.name] = servers.folder(c.name);
+            server_folders[model.tenant.prefix + c.name] = servers.folder(model.tenant.prefix + c.name);
           }
           if (c.placement == "ROUTER" ) {
-            router_folders[c.name] = routers.folder(c.name);
+            router_folders[model.tenant.prefix + c.name] = routers.folder(model.tenant.prefix + c.name);
           }
         }
 
@@ -209,7 +209,7 @@ Vue.component(
           var element  = document.createElement('a');
 
           element.setAttribute('href', URL.createObjectURL(content) )
-          element.setAttribute('download', "model-V" + model.version + ".zip");
+          element.setAttribute('download', this.model.vnf + "-V" + model.version + ".zip");
 
           element.style.display = 'none';
           document.body.appendChild(element);
