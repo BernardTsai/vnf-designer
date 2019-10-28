@@ -51,14 +51,17 @@ var schema = {
                            { "const": ""  }]
                         },
             "proxy":    { anyOf:
-                          [{ "type": "string", "description": "gateway ip address", "format": "ipv4"  },
+                          [{ "type": "string", "description": "proxy ip address", "format": "ipv4"  },
                            { "const": ""  }]
                         },
             "port":     { "type": "string", "description": "proxy port number" }
           }
         },
 
-        "jumphost":     { "type": "string", "description": "jumphost ip address", "format": "ipv4"  },
+        "jumphost": { anyOf:
+                      [{ "type": "string", "description": "jumphost ip address", "format": "ipv4"  },
+                       { "const": ""  }]
+                    },
 
         "proxy": {
           "description": "The parameters of the http proxy",
