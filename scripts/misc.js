@@ -5,7 +5,7 @@
 // range with the last octet defining the Range
 // e.g. 192.168.178.10-20
 function fixed_ips_filter(str) {
-  var pattern = /fixed: [^;]*/i
+  var pattern = /fixed:[^;]*/i
   var result  = []
 
   // extract the fixed ips part of the string
@@ -46,7 +46,7 @@ function fixed_ips_filter(str) {
 // range with the last octet defining the Range
 // e.g. 192.168.178.10-20
 function allowed_ips_filter(str) {
-  var pattern = /allowed: [^;]*/i
+  var pattern = /allowed:[^;]*/i
   var result  = []
 
   // extract the allowed ips part of the string

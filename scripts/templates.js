@@ -580,8 +580,8 @@ templates['Servers (delete all)'] = `#!/usr/bin/env ansible-playbook
   - name: Set nr = ""
     set_fact:
       nr: ""
-- name: Delete {{tenant.prefix}}{{component.name}}
-  import_tasks: {{tenant.prefix}}{{component.name}}/delete.yml
+  - name: Delete {{tenant.prefix}}{{component.name}}
+    import_tasks: {{tenant.prefix}}{{component.name}}/delete.yml
 {% else %}
 {% for index in range(component.max) %}
 - name: Set nr {{index+1}}
@@ -592,8 +592,8 @@ templates['Servers (delete all)'] = `#!/usr/bin/env ansible-playbook
   - name: Set nr = {{index+1}}
     set_fact:
       nr: {{index+1}}
-- name: Delete {{tenant.prefix}}{{component.name}} {{index+1}}
-  import_playbook: {{component.name}}/delete.yml
+  - name: Delete {{tenant.prefix}}{{component.name}} {{index+1}}
+    import_playbook: {{component.name}}/delete.yml
 {% endfor %}
 {% endif %}
 {% endif %}{% endif %}{% endfor %}`
@@ -757,15 +757,15 @@ templates['Servers (delete)'] = `{% for component in components %}{% if componen
 
 {% endfor %}
 
-{% for volume in component.volumes %}
-  # ----- {{volume.name}} volume for {{tenant.prefix}}{{component.name}} -----
-  - name: Detach volume {{volume.name}} to {{tenant.prefix}}{{component.name}}
-    os_server_volume:
+  # ----- {{tenant.prefix}}{{component.name}} virtual machine -----
+  - name: Delete virtual machine for {{tenant.prefix}}{{component.name}} server
+    os_server:
       state:          absent
-      server:         "{{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}"
-      volume:         "{{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}_{{volume.name}}"
+      name:           {{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}
       validate_certs: no
 
+{% for volume in component.volumes %}
+  # ----- {{volume.name}} volume for {{tenant.prefix}}{{component.name}} -----
   - name: Delete {{volume.name}} volume for {{tenant.prefix}}{{component.name}}
     os_volume:
       state:          absent
@@ -773,13 +773,6 @@ templates['Servers (delete)'] = `{% for component in components %}{% if componen
       validate_certs: no
 
 {% endfor %}
-
-  # ----- {{tenant.prefix}}{{component.name}} virtual machine -----
-  - name: Delete virtual machine for {{tenant.prefix}}{{component.name}} server
-    os_server:
-      state:          absent
-      name:           {{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}
-      validate_certs: no
 
 {% endif %}{% endif %}{% endfor %}`
 
