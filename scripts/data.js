@@ -16,11 +16,11 @@ tenant:
     vol_api:     ""
     plugin:      ""
   service:
-    network:     "oam"
-    cidr:        "10.0.0.0/24"
-    gateway:     "10.0.0.1"
-    proxy:       "10.0.0.20"
-    port:        "3128"
+    network:     ""
+    cidr:        ""
+    gateway:     ""
+    proxy:       ""
+    port:        ""
   jumphost:      ""
   proxy:
     http:        ""

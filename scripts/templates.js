@@ -16,12 +16,14 @@ tenant:
     region:      "{{tenant.auth.region}}"
     vol_api:     "{{tenant.auth.vol_api}}"
     plugin:      "{{tenant.auth.plugin}}"
+{% if tenant.service %}{% if tenant.service.network != "" %}
   service:
     network:     "{{tenant.service.network}}"
     cidr:        "{{tenant.service.cidr}}"
     gateway:     "{{tenant.service.gateway}}"
     proxy:       "{{tenant.service.proxy}}"
     port:        "{{tenant.service.port}}"
+{% endif %}{% endif%}
   jumphost:      "{{tenant.jumphost}}"
   proxy:
     http:        "{{tenant.proxy.http}}"
@@ -70,6 +72,7 @@ components:
 {% for component in components %}
   - uuid:         "{{component.uuid}}"
     name:         "{{component.name}}"
+    user:         "{{component.user}}"
     placement:    "{{component.placement}}"
     flavor:       "{{component.flavor}}"
     image:        "{{component.image}}"

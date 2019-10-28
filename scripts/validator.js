@@ -18,7 +18,7 @@ var schema = {
     "tenant": {
       "description": "The tenant information",
       "type":        "object",
-      "required":    ["name","auth","service"],
+      "required":    ["name","auth"],
       "properties": {
         "name":   { "type": "string", "description": "name of the tenant" },
         "prefix": { "type": "string", "description": "prefix for tenant resources" },
@@ -44,15 +44,21 @@ var schema = {
           "type":        "object",
           "required":    ["network","cidr","gateway","proxy","port"],
           "properties": {
-            "network":  { "type": "string", "description": "name of the service network", "minLength": 1  },
+            "network":  { "type": "string", "description": "name of the service network" },
             "cidr":     { "type": "string", "description": "cidr of the service network" },
-            "gateway":  { "type": "string", "description": "gateway ip address", "format": "ipv4"  },
-            "proxy":    { "type": "string", "description": "proxy ip address", "format": "ipv4" },
+            "gateway":  { anyOf:
+                          [{ "type": "string", "description": "gateway ip address", "format": "ipv4"  },
+                           { "const": ""  }]
+                        },
+            "proxy":    { anyOf:
+                          [{ "type": "string", "description": "gateway ip address", "format": "ipv4"  },
+                           { "const": ""  }]
+                        },
             "port":     { "type": "string", "description": "proxy port number" }
           }
         },
 
-        "jumphost":     { "type": "string", "description": "jumphost ip address" },
+        "jumphost":     { "type": "string", "description": "jumphost ip address", "format": "ipv4"  },
 
         "proxy": {
           "description": "The parameters of the http proxy",
@@ -303,7 +309,7 @@ var schema = {
                 "network": { "type": "string",
                   "description": "The virtual network via which the service is exposed" },
 
-                "protocol": { "type": "string", "enum": ["tcp", "udp", "icmp","sctp","none"],
+                "protocol": { "type": "string", "enum": ["tcp", "udp", "icmp","sctp","any","none"],
                   "description": "The service protocol" },
 
                 "range": { "type": "string", "minimum": 1,
