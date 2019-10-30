@@ -40,7 +40,7 @@ servers:
     interfaces:
 {% for port_name in port_names %}{% if port_name.startswith(server_name + '_') %}
 {% set n.port_found = false %}
-      {{ port_name | replace(server_name + "_","") }}:
+      {{ port_name | replace(prefix + server_name + "_","") }}:
 {% for port in ports.ansible_facts.openstack_ports %}{% if port.name == port_name %}{% set n.port_found = true %}
         status:    "defined"
         fixed:     "{{ port.fixed_ips | map(attribute='ip_address') | join(', ') }}"
@@ -65,28 +65,6 @@ stdout_callback = yaml
 [ssh_connection]
 ssh_args     = -F ./output/config
 control_path = ./mux-%r@%h:%p`
-
-//------------------------------------------------------------------------------
-
-files['config'] = `
-Host jumphost
-  User         ubuntu
-  HostName     {{ jumphost }}
-
-{% for server_name in server_names %}{% if server_name != "jumphost" %}
-{% for port in ports.ansible_facts.openstack_ports %}{% if port.name == (server_name + '_oam') %}
-Host {{server_name}}
-  User         centos
-  ProxyCommand ssh -i ../repository/id_rsa ubuntu@{{ jumphost }} -W %h:%p
-  HostName     {{ port.fixed_ips | map(attribute='ip_address') | join(', ') }}
-
-{% endif %}{% endfor %}
-{% endif %}{% endfor %}
-
-Host *
-  StrictHostKeyChecking no
-  UserKnownHostsFile=/dev/null
-  IdentityFile ../repository/id_rsa`
 
 //------------------------------------------------------------------------------
 

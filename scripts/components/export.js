@@ -179,9 +179,12 @@ Vue.component(
         zip.file(       "ansible.cfg",    files['ansible.cfg'])
         templates.file( "networks.tmpl",  files['networks.tmpl'])
         templates.file( "servers.tmpl",   files['servers.tmpl'])
-        templates.file( "config",         files['config'])
+        // templates.file( "config",         files['config'])
         templates.file( "inventory",      files['inventory'])
         output.file(    "inventory",      files['default_inventory'])
+
+        var txt = render(model, "config")
+        templates.file("config", txt, {unixPermissions: "644"})
 
         // export router creation files
         var txt  = render(model, "Router (create)")

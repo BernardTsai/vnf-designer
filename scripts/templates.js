@@ -295,6 +295,10 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
     - ../environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
+    - name: Define prefix
+      set_fact:
+        prefix: "{{tenant.prefix}}"
+
     - name: Define jumphost
       set_fact:
         jumphost: {{tenant.jumphost}}
@@ -332,10 +336,10 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
 {% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
 {% for interface in component.interfaces %}
 {% if component.max == 1 %}
-          - {{tenant.prefix}}{{component.name}}_{{interface.network}}
+          - {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{interface.network}}
 {% else %}
 {% for server_index in range(1,component.max,1) %}
-          - {{tenant.prefix}}{{component.name}}-{{server_index}}_{{interface.network}}
+          - {{tenant.prefix}}{{component.name}}-{{server_index}}_{{tenant.prefix}}{{interface.network}}
 {% endfor %}
 {% endif %}
 {% endfor %}
@@ -1066,3 +1070,27 @@ create, delete and determine status of servers:
 distribute ssh keys to servers:
 - ./servers/ssh.sh
 `
+
+//------------------------------------------------------------------------------
+
+templates['config'] = `
+Host jumphost
+  User         ubuntu
+  HostName     {{tenant.jumphost}}
+
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
+{{ "{%" }} for port in ports.ansible_facts.openstack_ports {{ "%}{%" }} if port.name == '{{tenant.prefix}}{{component.name}}_{{tenant.prefix}}oam' {{ "%}" }}
+Host {{component.name}}
+  User         {{component.user}}
+  ProxyCommand ssh -i ../repository/id_rsa ubuntu@{{tenant.jumphost}} -W %h:%p
+  HostName     {{ "{{" }} port.fixed_ips | map(attribute='ip_address') | join(', ') {{ "}}" }}
+
+{{ "{% endif %}{% endfor %}" }}
+{% endif %}{% endif %}{% endfor %}
+
+Host *
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null
+  IdentityFile ../repository/id_rsa`
+
+//------------------------------------------------------------------------------
