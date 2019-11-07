@@ -873,7 +873,7 @@ Host jumphost
   User         ubuntu
   HostName     {{tenant.jumphost}}
 
-{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.user != '' %}
 {{ "{%" }} for port in ports.ansible_facts.openstack_ports {{ "%}{%" }} if port.name == '{{tenant.prefix}}{{component.name}}_{{tenant.prefix}}oam' {{ "%}" }}
 Host {{component.name}}
   User         {{component.user}}
@@ -881,7 +881,7 @@ Host {{component.name}}
   HostName     {{ "{{" }} port.fixed_ips | map(attribute='ip_address') | join(', ') {{ "}}" }}
 
 {{ "{% endif %}{% endfor %}" }}
-{% endif %}{% endif %}{% endfor %}
+{% endif %}{% endif %}{% endif %}{% endfor %}
 
 Host *
   StrictHostKeyChecking no
