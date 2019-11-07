@@ -179,7 +179,7 @@ templates['Networks (create)'] = `#!/usr/bin/env ansible-playbook
   vars:
     ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
-    - ../environment.yml
+    - ../../input/environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
 {% for network in networks %}{% if network.external != "true" %}
@@ -212,7 +212,7 @@ templates['Networks (delete)'] = `#!/usr/bin/env ansible-playbook
   vars:
     ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
-    - ../environment.yml
+    - ../../input/environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
     - name: Delete subnets
@@ -246,7 +246,7 @@ templates['Networks (status)'] = `#!/usr/bin/env ansible-playbook
   vars:
     ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
-    - ../environment.yml
+    - ../../input/environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
     - name: Define networks
@@ -268,16 +268,10 @@ templates['Networks (status)'] = `#!/usr/bin/env ansible-playbook
       register: subnets
       ignore_errors: yes
 
-    - name: Create output directory
-      file:
-        path:  ../output
-        state: directory
-      delegate_to:  localhost
-
     - name: Create report 'networks.yml'
       template:
         src:  ../templates/networks.tmpl
-        dest: ../output/networks.yml
+        dest: ../../output/networks.yml
       delegate_to:  localhost
       changed_when: false`
 
@@ -292,7 +286,7 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
   vars:
     ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
-    - ../environment.yml
+    - ../../input/environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
     - name: Define prefix
@@ -357,30 +351,24 @@ templates['Servers (status)'] = `#!/usr/bin/env ansible-playbook
       register: ports
       ignore_errors: yes
 
-    - name: Create output directory
-      file:
-        path:  ../output
-        state: directory
-      delegate_to:  localhost
-
     - name: Create report 'servers.yml'
       template:
         src:  ../templates/servers.tmpl
-        dest: ../output/servers.yml
+        dest: ../../output/servers.yml
       delegate_to:  localhost
       changed_when: false
 
     - name: Create ansible ssh config
       template:
         src:  ../templates/config
-        dest: ../output/config
+        dest: ../../output/config
       delegate_to:  localhost
       changed_when: false
 
     - name: Create ansible inventory
       template:
         src:  ../templates/inventory
-        dest: ../output/inventory
+        dest: ../../output/inventory
       delegate_to:  localhost
       changed_when: false`
 
@@ -397,7 +385,7 @@ templates['Servers (define security)'] = `{% for component in components %}{% if
   vars:
     ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
-    - ../../environment.yml
+    - ../../../input/environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
 
@@ -471,7 +459,7 @@ templates['Servers (undefine security)'] = `{% for component in components %}{% 
   vars:
     ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
-    - ../../environment.yml
+    - ../../../input/environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
 
@@ -489,164 +477,26 @@ templates['Servers (undefine security)'] = `{% for component in components %}{% 
 
 //------------------------------------------------------------------------------
 
-templates['Servers (define security all)'] = `#!/usr/bin/env ansible-playbook
----
-{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
-- name: Create {{tenant.prefix}}{{component.name}}
-  import_playbook: {{tenant.prefix}}{{component.name}}/define_security.yml
-{% endif %}{% endif %}{% endfor %}`
-
-//------------------------------------------------------------------------------
-
-templates['Servers (define security all2)'] = `#!/usr/bin/env bash
-SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
-$SCRIPTPATH/{{tenant.prefix}}{{component.name}}/define_security.yml &
-{% endif %}{% endif %}{% endfor %}
-wait`
-
-//------------------------------------------------------------------------------
-
-templates['Servers (undefine security all)'] = `#!/usr/bin/env ansible-playbook
----
-{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
-- name: Create {{tenant.prefix}}{{component.name}}
-  import_playbook: {{tenant.prefix}}{{component.name}}/undefine_security.yml
-{% endif %}{% endif %}{% endfor %}`
-
-//------------------------------------------------------------------------------
-
-templates['Servers (undefine security all2)'] = `#!/usr/bin/env bash
-SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
-$SCRIPTPATH/{{tenant.prefix}}{{component.name}}/undefine_security.yml &
-{% endif %}{% endif %}{% endfor %}
-wait`
-
-//------------------------------------------------------------------------------
-
-templates['Servers (create all)'] = `#!/usr/bin/env ansible-playbook
----
-{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
-{% if component.max == 1 %}
-- name: Unset nr
-  hosts:        localhost
-  connection:   local
-  gather_facts: false
-  tasks:
-  - name: Set nr = ""
-    set_fact:
-      nr: ""
-- name: Create {{tenant.prefix}}{{component.name}}
-  import_playbook: {{tenant.prefix}}{{component.name}}/create.yml
-{% else %}
-{% for index in range(component.max) %}
-- name: Set nr {{index+1}}
-  hosts:        localhost
-  connection:   local
-  gather_facts: false
-  tasks:
-  - name: Set nr = {{index+1}}
-    set_fact:
-      nr: {{index+1}}
-- name: Create {{tenant.prefix}}{{component.name}} {{index+1}}
-  import_playbook: {{tenant.prefix}}{{component.name}}/create.yml
-{% endfor %}
-{% endif %}
-{% endif %}{% endif %}{% endfor %}`
-
-//------------------------------------------------------------------------------
-
-templates['Servers (create all2)'] = `#!/usr/bin/env bash
-SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
-{% if component.max == 1 %}
-$SCRIPTPATH/{{tenant.prefix}}{{component.name}}/create.yml &
-{% else %}
-{% for index in range(component.max) %}
-$SCRIPTPATH/{{tenant.prefix}}{{component.name}}/create.yml --extra-vars "nr={{index+1}}" &
-{% endfor %}
-{% endif %}
-{% endif %}{% endif %}{% endfor %}
-wait`
-
-//------------------------------------------------------------------------------
-
-templates['Servers (delete all)'] = `#!/usr/bin/env ansible-playbook
----
-{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
-{% if component.max == 1 %}
-- name: Unset nr
-  hosts:        localhost
-  connection:   local
-  gather_facts: false
-  tasks:
-  - name: Set nr = ""
-    set_fact:
-      nr: ""
-  - name: Delete {{tenant.prefix}}{{component.name}}
-    import_tasks: {{tenant.prefix}}{{component.name}}/delete.yml
-{% else %}
-{% for index in range(component.max) %}
-- name: Set nr {{index+1}}
-  hosts:        localhost
-  connection:   local
-  gather_facts: false
-  tasks:
-  - name: Set nr = {{index+1}}
-    set_fact:
-      nr: {{index+1}}
-  - name: Delete {{tenant.prefix}}{{component.name}} {{index+1}}
-    import_playbook: {{component.name}}/delete.yml
-{% endfor %}
-{% endif %}
-{% endif %}{% endif %}{% endfor %}`
-
-//------------------------------------------------------------------------------
-
-templates['Servers (delete all2)'] = `#!/usr/bin/env bash
-SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
-{% if component.max == 1 %}
-$SCRIPTPATH/{{tenant.prefix}}{{component.name}}/delete.yml &
-{% else %}
-{% for index in range(component.max) %}
-$SCRIPTPATH/{{tenant.prefix}}{{component.name}}/delete.yml --extra-vars "nr={{index+1}}" &
-{% endfor %}
-{% endif %}
-{% endif %}{% endif %}{% endfor %}
-wait`
-
-//------------------------------------------------------------------------------
-
-templates['Servers (create)'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
------ {{tenant.prefix}}{{component.name}} -----
+templates['Servers (create)'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% for index in range(component.max) %}{% if component.max == 1 %}{% set component_name = component.name %}{% else %}{% set component_name = component.name + "-" + (index+1) %}{% endif %}
+----- {{tenant.prefix}}{{component_name}} -----
 #!/usr/bin/env ansible-playbook
 ---
-- name: Create server {{tenant.prefix}}{{component.name}}
+- name: Create server {{tenant.prefix}}{{component_name}}
   hosts: localhost
   connection: local
   gather_facts: false
   vars:
     ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
-    - ../../environment.yml
+    - ../../../input/environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
-  - name: Set index I/II
-    set_fact:
-      idx: "{{ '{{' }} nr | default ('') {{ '}}' }}"
-
-  - name: Set index II/II
-    set_fact:
-      index: "{{ '{{' }} (idx == '') | ternary( '', '-' + idx) {{ '}}' }}"
-
 {% for interface in component.interfaces %}
-  # ----- {{interface.network}} port for {{tenant.prefix}}{{component.name}} -----
-  - name: Create {{interface.network}} port for {{tenant.prefix}}{{component.name}}
+  # ----- {{interface.network}} port for {{tenant.prefix}}{{component_name}} -----
+  - name: Create {{interface.network}} port for {{tenant.prefix}}{{component_name}}
     os_port:
       state:          present
-      name:           "{{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}_{{tenant.prefix}}{{interface.network}}"
+      name:           "{{tenant.prefix}}{{component_name}}_{{tenant.prefix}}{{interface.network}}"
       network:        "{{tenant.prefix}}{{interface.network}}"
       validate_certs: no
       security_groups:
@@ -664,11 +514,11 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
 
 {% endfor %}
 
-  # ----- {{component.name}} virtual machine -----
-  - name: Create virtual machine for {{component.name}} server
+  # ----- {{component_name}} virtual machine -----
+  - name: Create virtual machine for {{component_name}} server
     os_server:
       state:          present
-      name:           {{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}
+      name:           {{tenant.prefix}}{{component_name}}
       flavor:         "{{component.flavor}}"
       image:          "{{component.image}}"
       key_name:       fiveg_key
@@ -678,10 +528,10 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
       validate_certs: no
       nics:
 {% for interface in component.interfaces %}
-        - port-name: {{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}_{{tenant.prefix}}{{interface.network}}
+        - port-name: {{tenant.prefix}}{{component_name}}_{{tenant.prefix}}{{interface.network}}
 {% endfor %}
       meta:
-       hostname: {{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}
+       hostname: {{tenant.prefix}}{{component_name}}
 {% if component.userdata != "" %}
       userdata: |
         {{ component.userdata | indent(8) | safe }}
@@ -706,152 +556,87 @@ templates['Servers (create)'] = `{% for component in components %}{% if componen
 {% endif %}{% endif %}
 
 {% for volume in component.volumes %}
-  # ----- {{volume.name}} volume for {{tenant.prefix}}{{component.name}} -----
-  - name: Create {{volume.name}} volume for {{tenant.prefix}}{{component.name}}
+  # ----- {{volume.name}} volume for {{tenant.prefix}}{{component_name}} -----
+  - name: Create {{volume.name}} volume for {{tenant.prefix}}{{component_name}}
     os_volume:
       state:          present
-      name:           "{{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}_{{volume.name}}"
+      name:           "{{tenant.prefix}}{{component_name}}_{{volume.name}}"
       size:           {{volume.size}}
-      display_name:   "{{volume.name}} volume for {{tenant.prefix}}{{component.name}}"
+      display_name:   "{{volume.name}} volume for {{tenant.prefix}}{{component_name}}"
       validate_certs: no
 
-  - name: Attach volume {{volume.name}} to {{tenant.prefix}}{{component.name}}
+  - name: Attach volume {{volume.name}} to {{tenant.prefix}}{{component_name}}
     os_server_volume:
       state:          present
-      server:         "{{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}"
-      volume:         "{{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}_{{volume.name}}"
+      server:         "{{tenant.prefix}}{{component_name}}"
+      volume:         "{{tenant.prefix}}{{component_name}}_{{volume.name}}"
       validate_certs: no
 
 {% endfor %}
 
-{% endif %}{% endif %}{% endfor %}`
+{% endfor %}{% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
 
-templates['Servers (delete)'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
------ {{tenant.prefix}}{{component.name}} -----
+templates['Servers (delete)'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% for index in range(component.max) %}{% if component.max == 1 %}{% set component_name = component.name %}{% else %}{% set component_name = component.name + "-" + (index+1) %}{% endif %}
+----- {{tenant.prefix}}{{component_name}} -----
 #!/usr/bin/env ansible-playbook
 ---
-- name: Delete server {{component.name}}
+- name: Delete server {{component_name}}
   hosts: localhost
   connection: local
   gather_facts: false
   vars:
     ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
-    - ../../environment.yml
+    - ../../../input/environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
-  - name: Set index I/II
-    set_fact:
-      idx: "{{ '{{' }} nr | default ('') {{ '}}' }}"
-
-  - name: Set index II/II
-    set_fact:
-      index: "{{ '{{' }} (idx == '') | ternary( '', '-' + idx) {{ '}}' }}"
-
 {% for interface in component.interfaces %}
-  # ----- {{tenant.prefix}}{{interface.network}} port for {{tenant.prefix}}{{component.name}} -----
-  - name: Delete {{tenant.prefix}}{{interface.network}} port for {{tenant.prefix}}{{component.name}}
+  # ----- {{tenant.prefix}}{{interface.network}} port for {{tenant.prefix}}{{component_name}} -----
+  - name: Delete {{tenant.prefix}}{{interface.network}} port for {{tenant.prefix}}{{component_name}}
     os_port:
       state:          absent
-      name:           "{{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}_{{tenant.prefix}}{{interface.network}}"
+      name:           "{{tenant.prefix}}{{component_name}}_{{tenant.prefix}}{{interface.network}}"
       network:        "{{tenant.prefix}}{{interface.network}}"
       validate_certs: no
 
 {% endfor %}
 
-  # ----- {{tenant.prefix}}{{component.name}} virtual machine -----
-  - name: Delete virtual machine for {{tenant.prefix}}{{component.name}} server
+  # ----- {{tenant.prefix}}{{component_name}} virtual machine -----
+  - name: Delete virtual machine for {{tenant.prefix}}{{component_name}} server
     os_server:
       state:          absent
-      name:           {{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}
+      name:           {{tenant.prefix}}{{component_name}}
       validate_certs: no
 
 {% for volume in component.volumes %}
-  # ----- {{volume.name}} volume for {{tenant.prefix}}{{component.name}} -----
-  - name: Delete {{volume.name}} volume for {{tenant.prefix}}{{component.name}}
+  # ----- {{volume.name}} volume for {{tenant.prefix}}{{component_name}} -----
+  - name: Delete {{volume.name}} volume for {{tenant.prefix}}{{component_name}}
     os_volume:
       state:          absent
-      name:           "{{tenant.prefix}}{{component.name}}{{ '{{ index }}' }}_{{volume.name}}"
+      name:           "{{tenant.prefix}}{{component_name}}_{{volume.name}}"
       validate_certs: no
 
 {% endfor %}
 
-{% endif %}{% endif %}{% endfor %}`
+{% endfor %}{% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
 
-templates['Servers (ssh all)'] = `#!/usr/bin/env ansible-playbook
----
-{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.user != '' %}
-{% if component.max == 1 %}
-- name: Unset nr
-  hosts:        localhost
-  connection:   local
-  gather_facts: false
-  tasks:
-  - name: Set nr = ""
-    set_fact:
-      nr: ""
-- name: SSH for {{tenant.prefix}}{{component.name}}
-  import_playbook: {{tenant.prefix}}{{component.name}}/ssh.yml
-{% else %}
-{% for index in range(component.max) %}
-- name: Set nr {{index+1}}
-  hosts:        localhost
-  connection:   local
-  gather_facts: false
-  tasks:
-  - name: Set nr = {{index+1}}
-    set_fact:
-      nr: {{index+1}}
-- name: SSH for {{tenant.prefix}}{{component.name}} {{index+1}}
-  import_playbook: {{tenant.prefix}}{{component.name}}/ssh.yml
-{% endfor %}
-{% endif %}
-{% endif %}{% endif %}{% endif %}{% endfor %}`
-
-//------------------------------------------------------------------------------
-
-templates['Servers (ssh all2)'] = `#!/usr/bin/env bash
-SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.user != '' %}
-{% if component.max == 1 %}
-$SCRIPTPATH/{{tenant.prefix}}{{component.name}}/ssh.yml &
-{% else %}
-{% for index in range(component.max) %}
-$SCRIPTPATH/{{tenant.prefix}}{{component.name}}/ssh.yml --extra-vars "nr={{index+1}}" &
-{% endfor %}
-{% endif %}
-{% endif %}{% endif %}{% endif %}{% endfor %}
-wait`
-
-//------------------------------------------------------------------------------
-
-templates['Servers (ssh)'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.user != '' %}
------ {{tenant.prefix}}{{component.name}} -----
+templates['Servers (ssh)'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.user != '' %}{% for index in range(component.max) %}{% if component.max == 1 %}{% set component_name = component.name %}{% else %}{% set component_name = component.name + "-" + (index+1) %}{% endif %}
+----- {{tenant.prefix}}{{component_name}} -----
 #!/usr/bin/env ansible-playbook
 ---
 - name: Determine index of server
   hosts: localhost
   gather_facts: false
   tasks:
-    - name: Set index I/II
-      set_fact:
-        host: "{{tenant.prefix}}{{component.name + '-' + '{{ nr }}' }}"
-      when: nr is defined
-
-    - name: Set index II/II
-      set_fact:
-        host: "{{tenant.prefix}}{{component.name}}"
-      when: nr is not defined
-
-- name: Update ssh keys for server '{{tenant.prefix}}{{component.name}}'
-  hosts: "{{ "{{ hostvars['localhost']['host'] }}" | safe }}"
+- name: Update ssh keys for server '{{tenant.prefix}}{{component_name}}'
+  hosts: "{{component_name}}"
   gather_facts: false
   tasks:
-    - name: Update authorized keys file for server '{{tenant.prefix}}{{component.name}}'
+    - name: Update authorized keys file for server '{{tenant.prefix}}{{component_name}}'
       authorized_key:
         user: '{{ component.user }}'
         key: "{{ '{{ item }}' }}"
@@ -859,8 +644,8 @@ templates['Servers (ssh)'] = `{% for component in components %}{% if component.p
         exclusive: True
       become: yes
       with_file:
-        - ../../../repository/authorized_keys
-{% endif %}{% endif %}{% endif %}{% endfor %}`
+        - ../../../input/authorized_keys
+{% endfor %}{% endif %}{% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
 
@@ -875,7 +660,7 @@ templates['Router (create)'] = `{% for component in components %}{% if component
   vars:
     ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
-    - ../../environment.yml
+    - ../../../input/environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
 
@@ -906,7 +691,7 @@ templates['Router (delete)'] = `{% for component in components %}{% if component
   vars:
     ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
   vars_files:
-    - ../../environment.yml
+    - ../../../input/environment.yml
   environment: "{{ '{{env_vars}}' }}"
   tasks:
 
@@ -932,7 +717,7 @@ export OS_PROJECT_NAME={{tenant.name}}
 export OS_USERNAME={{tenant.auth.username}}
 export OS_PASSWORD={{tenant.auth.password}}
 export OS_AUTH_URL={{tenant.auth.url}}
-export OS_CACERT=../repository/openstack.crt`
+export OS_CACERT=./input/openstack.crt`
 
 //------------------------------------------------------------------------------
 
@@ -952,7 +737,7 @@ templates['ssh'] = `#!/usr/bin/env ansible-playbook
         exclusive: True
       become: yes
       with_file:
-        - ../../repository/authorized_keys
+        - ../../input/authorized_keys
 
 {% else %}
 {% for server_index in range(1,1+component.max,1) %}
@@ -968,7 +753,7 @@ templates['ssh'] = `#!/usr/bin/env ansible-playbook
         exclusive: True
       become: yes
       with_file:
-        - ../../repository/authorized_keys
+        - ../../input/authorized_keys
 
 {% endfor %}
 {% endif %}
@@ -1041,7 +826,7 @@ Prequisites
 - access to OpenStack API
 - ansible installed
 - openstack client installed
-- repository directory (next to the directory containing this readme):
+- input directory (next to the directory containing this readme):
   - id_rsa (private key for accessing the virtual machines)
   - openstack.crt (certificate file of OpenStack API)
   - authorized_keys (file with all public keys to be uploaded to VMs)
@@ -1053,22 +838,32 @@ Preparation
 Usage
 -----
 
+create and delete the whole infrastructure
+determine status of the whole infrastructure
+distribute keys to all servers and
+connct to a specific server
+- infrastructure_create.sh
+- infrastructure_delete.sh
+- infrastructure_status.sh
+- infrastructure_authorize.sh
+- infrastructure_connect.sh <server>
+
 create, delete and determine status of networks:
-- ./networks/create.yml
-- ./networks/delete.yml
-- ./networks/status.yml
+- ./elements/networks/create.yml
+- ./elements/networks/delete.yml
+- ./elements/networks/status.yml
 
 create, delete security policies:
-- ./servers/define_security.sh
-- ./servers/undefine_security.sh
+- ./elements/servers/<server>/define_security.yml
+- ./elements/servers/<server>/undefine_security.yml
 
 create, delete and determine status of servers:
-- ./servers/create.sh
-- ./servers/delete.sh
-- ./servers/status.yml
+- ./elements/servers/<server>/create.yml
+- ./elements/servers/<server>/delete.yml
+- ./elements/servers/status.yml
 
 distribute ssh keys to servers:
-- ./servers/ssh.sh
+- ./elements/servers/<server>/ssh.yml
 `
 
 //------------------------------------------------------------------------------
@@ -1082,7 +877,7 @@ Host jumphost
 {{ "{%" }} for port in ports.ansible_facts.openstack_ports {{ "%}{%" }} if port.name == '{{tenant.prefix}}{{component.name}}_{{tenant.prefix}}oam' {{ "%}" }}
 Host {{component.name}}
   User         {{component.user}}
-  ProxyCommand ssh -i ../repository/id_rsa ubuntu@{{tenant.jumphost}} -W %h:%p
+  ProxyCommand ssh -i ./input/id_rsa ubuntu@{{tenant.jumphost}} -W %h:%p
   HostName     {{ "{{" }} port.fixed_ips | map(attribute='ip_address') | join(', ') {{ "}}" }}
 
 {{ "{% endif %}{% endfor %}" }}
@@ -1091,6 +886,6 @@ Host {{component.name}}
 Host *
   StrictHostKeyChecking no
   UserKnownHostsFile=/dev/null
-  IdentityFile ../repository/id_rsa`
+  IdentityFile ./input/id_rsa`
 
 //------------------------------------------------------------------------------

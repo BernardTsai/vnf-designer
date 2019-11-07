@@ -26,40 +26,52 @@ Vue.component(
       downloadArchive: function(){
         var zip = new JSZip();
 
+        // construct folders
+        var input     = zip.folder("input")
+        var output    = zip.folder("output")
+        var elements  = zip.folder("elements")
+        var docs      = zip.folder("docs")
+        var bin       = zip.folder("bin")
+
+        var tenant    = elements.folder("tenant")
+        var networks  = elements.folder("networks")
+        var servers   = elements.folder("servers")
+        var routers   = elements.folder("router")
+        var templates = elements.folder("templates")
+
         // export readme.md
         var txt = render(model, "readme")
-        zip.file("README.md", txt)
+        docs.file("README.md", txt)
 
         // export model
         var txt = jsyaml.safeDump(model)
-        zip.file("model.yml", txt);
+        docs.file("model.yml", txt);
 
         // export communication matrix
         var txt = render(model, "Communication Matrix")
-        zip.file("communication_matrix.txt", txt)
+        docs.file("communication_matrix.txt", txt)
 
         // export environment file
         var txt = render(model, "Environment")
-        zip.file("environment.yml", txt)
+        input.file("environment.yml", txt)
 
         // export openrc file
         var txt = render(model, "openrc")
-        zip.file("openrc", txt)
+        input.file("openrc", txt)
 
         // export prequisites file
         var txt = render(model, "Prequisites")
-        zip.file("prequisites.txt", txt)
+        docs.file("prequisites.txt", txt)
 
         // export setup.sh
         zip.file("setup.sh", files['setup'])
 
-        // construct folders
-        var tenant    = zip.folder("tenant")
-        var networks  = zip.folder("networks")
-        var servers   = zip.folder("servers")
-        var routers   = zip.folder("router")
-        var templates = zip.folder("templates")
-        var output    = zip.folder("output")
+        // export shell scripts into bin
+        bin.file("infrastructure_create.sh",    files['infrastructure_create.sh'])
+        bin.file("infrastructure_delete.sh",    files['infrastructure_delete.sh'])
+        bin.file("infrastructure_status.sh",    files['infrastructure_status.sh'])
+        bin.file("infrastructure_authorize.sh", files['infrastructure_authorize.sh'])
+        bin.file("infrastructure_connect.sh",   files['infrastructure_connect.sh'])
 
         // construct a folder for each internal component
         var server_folders = {}
@@ -89,41 +101,6 @@ Vue.component(
         var txt = render(model, "Servers (status)")
         servers.file("status.yml", txt, {unixPermissions: "755"})
 
-        // export servers define security all file
-        var txt = render(model, "Servers (define security all)")
-        servers.file("define_security.yml", txt, {unixPermissions: "755"})
-
-        var txt = render(model, "Servers (define security all2)")
-        servers.file("define_security.sh", txt, {unixPermissions: "755"})
-
-        // export servers undefine security all file
-        var txt = render(model, "Servers (undefine security all)")
-        servers.file("undefine_security.yml", txt, {unixPermissions: "755"})
-
-        var txt = render(model, "Servers (undefine security all2)")
-        servers.file("undefine_security.sh", txt, {unixPermissions: "755"})
-
-        // export servers create all file
-        var txt = render(model, "Servers (create all)")
-        servers.file("create.yml", txt, {unixPermissions: "755"})
-
-        var txt = render(model, "Servers (create all2)")
-        servers.file("create.sh", txt, {unixPermissions: "755"})
-
-        // export servers delete all file
-        var txt = render(model, "Servers (delete all)")
-        servers.file("delete.yml", txt, {unixPermissions: "755"})
-
-        var txt = render(model, "Servers (delete all2)")
-        servers.file("delete.sh", txt, {unixPermissions: "755"})
-
-        // export servers ssh keys update file
-        var txt = render(model, "Servers (ssh all)")
-        servers.file("ssh.yml", txt, {unixPermissions: "755"})
-
-        var txt = render(model, "Servers (ssh all2)")
-        servers.file("ssh.sh", txt, {unixPermissions: "755"})
-
         // export server security definition files
         var txt  = render(model, "Servers (define security)")
         var txts = splitter(txt)
@@ -149,9 +126,11 @@ Vue.component(
         var txts = splitter(txt)
 
         for (var server in txts) {
-          var folder  = server_folders[server]
-          var content = txts[server]
-          folder.file("create.yml", content, {unixPermissions: "755"})
+          var serverType  = server.split("-")[0]
+          var serverIndex = server.split("-")[1] ? "-" + server.split("-")[1] : ""
+          var folder      = server_folders[serverType]
+          var content     = txts[server]
+          folder.file("create" + serverIndex + ".yml", content, {unixPermissions: "755"})
         }
 
         // export server deletion files
@@ -159,9 +138,11 @@ Vue.component(
         var txts = splitter(txt)
 
         for (var server in txts) {
-          var folder  = server_folders[server]
-          var content = txts[server]
-          folder.file("delete.yml", content, {unixPermissions: "755"})
+          var serverType  = server.split("-")[0]
+          var serverIndex = server.split("-")[1] ? "-" + server.split("-")[1] : ""
+          var folder      = server_folders[serverType]
+          var content     = txts[server]
+          folder.file("delete" + serverIndex + ".yml", content, {unixPermissions: "755"})
         }
 
         // export server ssh management files
@@ -169,17 +150,19 @@ Vue.component(
         var txts = splitter(txt)
 
         for (var server in txts) {
-          var folder  = server_folders[server]
-          var content = txts[server]
-          folder.file("ssh.yml", content, {unixPermissions: "755"})
+          var serverType  = server.split("-")[0]
+          var serverIndex = server.split("-")[1] ? "-" + server.split("-")[1] : ""
+          var folder      = server_folders[serverType]
+          var content     = txts[server]
+          folder.file("ssh" + serverIndex + ".yml", content, {unixPermissions: "755"})
         }
 
         // export networks and servers template file
         // export ansible cfg file
-        zip.file(       "ansible.cfg",    files['ansible.cfg'])
+        input.file(     "ansible.cfg",    files['ansible.cfg'])
         templates.file( "networks.tmpl",  files['networks.tmpl'])
         templates.file( "servers.tmpl",   files['servers.tmpl'])
-        // templates.file( "config",         files['config'])
+        templates.file( "config",         files['config'])
         templates.file( "inventory",      files['inventory'])
         output.file(    "inventory",      files['default_inventory'])
 
