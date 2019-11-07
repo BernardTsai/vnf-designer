@@ -217,10 +217,10 @@ echo "==========================================================================
 echo "= Deploy keys on each server                                                   ="
 echo "================================================================================"
 
-for DIR in $SCRIPTPATH/servers/*/;
+for SCRIPT in $SCRIPTPATH/servers/*/ssh*;
 do
-    echo "- $DIR/ssh.yml"
-    $DIR/ssh.yml -i $ROOT/output/inventory > /dev/null &
+    echo "- $SCRIPT"
+    $SCRIPT -i $ROOT/output/inventory > /dev/null &
 done
 wait
 echo ""
@@ -293,7 +293,7 @@ echo "==========================================================================
 
 for DIR in $SCRIPTPATH/servers/*/;
 do
-    echo "- SDIR/define_security.yml"
+    echo "- $DIR/define_security.yml"
     $DIR/define_security.yml > /dev/null &
 done
 wait
@@ -304,10 +304,10 @@ echo "==========================================================================
 echo "= Setting up servers                                                           ="
 echo "================================================================================"
 
-for DIR in $SCRIPTPATH/servers/*/;
+for SCRIPT in $SCRIPTPATH/servers/*/create*;
 do
-    echo "- $DIR/create.yml"
-    $DIR/create.yml > /dev/null &
+    echo "- $SCRIPT"
+    $SCRIPT > /dev/null &
 done
 wait
 echo ""
@@ -330,10 +330,10 @@ echo "==========================================================================
 echo "= Tear down servers                                                            ="
 echo "================================================================================"
 
-for DIR in $SCRIPTPATH/servers/*/;
+for SCRIPT in $SCRIPTPATH/servers/*/delete*;
 do
-    echo "- $DIR/delete.yml"
-    $DIR/delete.yml > /dev/null &
+    echo "- $SCRIPT"
+    $SCRIPT > /dev/null &
 done
 wait
 echo ""
