@@ -199,6 +199,18 @@ templates['Networks (create)'] = `#!/usr/bin/env ansible-playbook
       allocation_pool_end:   {{network.ipv4end}}
       validate_certs:        no
 
+{% if network.ipv6 != "" %}
+  - name: Create {{network.name}} subnet2
+    os_subnet:
+      state:                 present
+      network_name:          {{tenant.prefix}}{{network.name}}
+      name:                  {{tenant.prefix}}{{network.name}}_subnet2
+      cidr:                  {{network.ipv6}}
+      allocation_pool_start: {{network.ipv6start}}
+      allocation_pool_end:   {{network.ipv6end}}
+      validate_certs:        no
+
+{% endif %}
 {% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------
