@@ -295,10 +295,10 @@ function getInventory(req, res) {
 
   //----------------------------------------------------------------------------
   // determine credentials
-  url      = req.body.url      ? req.body.url      : "https://keystone.ic-defraf1.in.pan-net.eu:5000/v2.0/tokens"
-  tenant   = req.body.tenant   ? req.body.tenant   : "5g_trial"
-  username = req.body.username ? req.body.username : "5g_trial_user"
-  password = req.body.password ? req.body.password : "lairt_g5_13"
+  url      = req.body.url      ? req.body.url      : "https://ajjasdjeasd.eu:5000/v2.0/tokens"
+  tenant   = req.body.tenant   ? req.body.tenant   : "jjdjjasdjjad"
+  username = req.body.username ? req.body.username : "adjajsda"
+  password = req.body.password ? req.body.password : "hadhhwdahdas"
 
   // contruct authentication body
   var body = {
