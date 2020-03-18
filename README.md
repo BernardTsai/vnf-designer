@@ -33,3 +33,7 @@ Steps
 - Install missing dependencies via "npm install"
 - Start server via "node index.js"
 - Open following url in a  browser: "http://localhost:3000"
+
+# Documentation
+
+Further documentation can be found here: [...](docs/readme.md)
