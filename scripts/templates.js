@@ -12,7 +12,12 @@ tenant:
     password:    "{{tenant.auth.password}}"
     proxy:       "{{tenant.auth.proxy}}"
     url:         "{{tenant.auth.url}}"
-    cert:        "{{tenant.auth.cert}}"
+{% if tenant.auth.cert == "" %}
+    cert:        ""
+{% else %}
+    cert:        |
+      {{tenant.auth.cert | indent(6, false) }}
+{% endif %}
     region:      "{{tenant.auth.region}}"
     vol_api:     "{{tenant.auth.vol_api}}"
     plugin:      "{{tenant.auth.plugin}}"
@@ -47,7 +52,7 @@ flavors:
 {% endfor %}
 {% endfor %}
 images:
-{% for image in images -%}
+{% for image in images %}
   - { uuid: "{{image.uuid}}", name: "{{image.name}}", version: "{{image.version}}", format: "{{image.format}}", container: "{{image.container}}", disk: "{{image.disk}}", size: "{{image.size}}", checksum: "{{image.checksum}}", url: "{{image.url}}", special: "{{image.special}}" }
 {% endfor %}
 networks:
@@ -729,7 +734,13 @@ export OS_PROJECT_NAME={{tenant.name}}
 export OS_USERNAME={{tenant.auth.username}}
 export OS_PASSWORD={{tenant.auth.password}}
 export OS_AUTH_URL={{tenant.auth.url}}
-export OS_CACERT=./input/openstack.crt`
+export OS_CACERT=./openstack.crt`
+
+//------------------------------------------------------------------------------
+
+templates['openstack.crt'] = `
+{{tenant.auth.cert}}
+`
 
 //------------------------------------------------------------------------------
 
@@ -899,5 +910,172 @@ Host *
   StrictHostKeyChecking no
   UserKnownHostsFile=/dev/null
   IdentityFile ./input/id_rsa`
+
+//------------------------------------------------------------------------------
+
+templates['HEAT Networks'] = `
+heat_template_version: 2015-04-30
+resources:
+{% for network in networks %}{% if network.external != "true" %}
+  {{tenant.prefix}}{{network.name}}:
+    type: OS::Neutron::Net
+    properties:
+      name:                  "{{tenant.prefix}}{{network.name}}"
+      admin_state_up:        true
+      port_security_enabled: true
+      shared:                false
+
+{% if network.ipv4 != "" %}
+  {{tenant.prefix}}{{network.name}}_v4:
+    type: OS::Neutron::Subnet
+    properties:
+      name:              "{{tenant.prefix}}{{network.name}}_v4"
+      network:           { get_attr: [{{tenant.prefix}}{{network.name}}, name] }
+      cidr:              {{network.ipv4}}
+      ip_version:        4
+      allocation_pools: [{ "start": {{network.ipv4start}}, "end": {{network.ipv4end}} }]
+      gateway_ip:       {{network.ipv4gw}}
+      enable_dhcp:      true
+{% endif %}
+
+{% if network.ipv6 != "" %}
+  {{tenant.prefix}}{{network.name}}_v6:
+    type: OS::Neutron::Subnet
+    properties:
+      name:              "{{tenant.prefix}}{{network.name}}_v6"
+      network:           { get_attr: [{{tenant.prefix}}{{network.name}}, name] }
+      cidr:              {{network.ipv6}}
+      ip_version:        6
+      allocation_pools: [{ "start": {{network.ipv6start}}, "end": {{network.ipv6end}} }]
+      gateway_ip:       {{network.ipv6gw}}
+      enable_dhcp:      true
+{% endif %}{% endif %}{% endfor %}
+
+{% for component in components %}{% if component.placement == 'ROUTER' %}
+  {{tenant.prefix}}{{component.name}}:
+     type: OS::Neutron::Router
+     properties:
+       name:           "{{tenant.prefix}}{{component.name}}"
+       admin_state_up: true
+
+{% for interface in component.interfaces %}{% for network in networks %}{% if network.name == interface.network %}
+{% if network.ipv4 != "" %}
+  {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{interface.network}}:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router: { get_attr: [{{tenant.prefix}}{{component.name}}, name] }
+      subnet: { get_attr: [{{tenant.prefix}}{{network.name}}_v4, name] }
+
+{% endif %}
+{% if network.ipv6 != "" %}
+  {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{interface.network}}:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router: { get_attr: [{{tenant.prefix}}{{component.name}}, name] }
+      subnet: { get_attr: [{{tenant.prefix}}{{network.name}}_v6, name] }
+
+{% endif %}
+{% endif %}{% endfor %}{% endfor %}
+
+{% endif %}{% endfor %}`
+
+//------------------------------------------------------------------------------
+
+templates['HEAT Security'] = `
+heat_template_version: 2015-04-30
+resources:
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
+{% for interface in component.interfaces %}
+  {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{interface.network}}:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name:        "{{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{interface.network}}"
+      rules:
+        - {protocol: icmp, port_range_min: 0, port_range_max: 255,   remote_ip_prefix: 0.0.0.0/0}
+        - {protocol: tcp,  port_range_min: 0, port_range_max: 65535, remote_ip_prefix: 0.0.0.0/0}
+        - {protocol: udp,  port_range_min: 0, port_range_max: 65535, remote_ip_prefix: 0.0.0.0/0}
+{% for service in component.services %}{% if interface.network == service.network %}
+{% for network in networks %}{% if interface.network == network.name %}
+        - {protocol: {{service.protocol}}, port_range_min: {{service.range | portmin }}, port_range_max: {{service.range | portmax }}, remote_ip_prefix: {{network.ipv4}} }
+{% endif %}{% endfor %}
+{% endif %}{% endfor %}
+{% for service in component.services %}{% if interface.network == service.network %}
+{% for component2 in components %}{% if component2.placement != 'ROUTER' %}
+{% for dependency in component2.dependencies %}{% if dependency.component == component.name %}{% if dependency.service == service.name %}
+{% for network2 in networks %}{% if dependency.network == network2.name %}
+        - {protocol: {{service.protocol}}, port_range_min: {{service.range | portmin }}, port_range_max: {{service.range | portmax }}, remote_ip_prefix: {{network2.ipv4}} }
+{% endif %}{% endfor %}
+{% endif %}{% endif %}{% endfor %}
+{% endif %}{% endfor %}
+{% endif %}{% endfor %}
+
+{% endfor %}
+{% endif %}{% endif %}{% endfor %}`
+
+//------------------------------------------------------------------------------
+
+templates['HEAT Servers'] = `{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% for index in range(component.max) %}{% if component.max == 1 %}{% set component_name = component.name %}{% else %}{% set component_name = component.name + "-" + (index+1) %}{% endif %}
+----- {{tenant.prefix}}{{component_name}} -----
+heat_template_version: 2015-04-30
+resources:
+{% for interface in component.interfaces %}
+  # ----- Port: {{tenant.prefix}}{{interface.network}} for {{tenant.prefix}}{{component_name}} -----
+  {{tenant.prefix}}{{component_name}}_{{tenant.prefix}}{{interface.network}}:
+     type: OS::Neutron::Port
+     properties:
+       name:                  "{{tenant.prefix}}{{component_name}}_{{tenant.prefix}}{{interface.network}}"
+       network:               "{{tenant.prefix}}{{interface.network}}"
+       security_groups:       [ "{{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{interface.network}}" ]
+       port_security_enabled: true
+       admin_state_up:        true
+{% if interface.attributes|allowed|length > 0 %}
+       allowed_address_pairs:
+{% for allowed in interface.attributes|allowed %}
+         - ip_address: {{allowed}}
+{% endfor %}{% endif %}
+{% if interface.attributes|fixed|length > 0 %}
+       fixed_ips:
+{% for fixed in interface.attributes|fixed %}
+         - ip_address: {{fixed}}
+{% endfor %}{% endif %}
+
+{% endfor %}
+
+{% for volume in component.volumes %}
+  # ----- Volume: {{volume.name}} volume for {{tenant.prefix}}{{component_name}} -----
+  {tenant.prefix}}{{component_name}}_{{volume.name}}:
+    type: OS::Cinder::Volume
+    properties:
+      name:           "{{tenant.prefix}}{{component_name}}_{{volume.name}}"
+      size:           {{volume.size}}
+{% endfor %}
+
+  # ----- Server: {{tenant.prefix}}{{component_name}} -----
+  {{component_name}}:
+    type: OS::Nova::Server
+    properties:
+      name:         "{{component_name}}"
+      flavor:       "{{component.flavor}}"
+      image:        "{{component.image}}"
+      key_name:     "admin"
+      config_drive: true
+{% if component.userdata != "" %}
+      userdata: |
+        {{ component.userdata | indent(8) | safe }}
+{% endif %}
+      networks:
+{% for interface in component.interfaces %}
+        - port: { get_resource: {{tenant.prefix}}{{component_name}}_{{tenant.prefix}}{{interface.network}} }
+{% endfor %}
+{% if component.volumes|length > 0 %}
+      block_device_mapping
+{% set devices = [ '', '/dev/vda', '/dev/vdb', '/dev/vdc', '/dev/vdd', '/dev/vde', '/dev/vdf', '/dev/vdg', '/dev/vdh', '/dev/vdi', '/dev/vdj' ] %}
+{% for volume in component.volumes %}
+        - device_name: {{ devices[loop.index] }}
+          volume_id:   { get_resource: {{tenant.prefix}}{{component_name}}_{{volume.name}} }
+{% endfor %}
+{% endif %}
+
+{% endfor %}{% endif %}{% endif %}{% endfor %}`
 
 //------------------------------------------------------------------------------

@@ -11,7 +11,7 @@ Vue.component(
       download: function() {
         var text     = document.getElementById("export").value
         var element  = document.createElement('a')
-        var filename = this.view.export == "Canonical" ? this.model.vnf + "-V" + this.model.version + ".yml" : "descriptor.txt"
+        var filename = this.view.export == "Canonical" ? this.model.vnf + "-V" + this.model.version + ".yml" : "descriptor"
 
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
         element.setAttribute('download', filename);

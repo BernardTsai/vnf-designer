@@ -376,7 +376,8 @@ Vue.component( 'tenantform',
       </div>
       <div class="line">
         <label for="tenant_auth_cert">CERT:</label>
-        <input v-model="model.tenant.auth.cert" id="tenant_auth_cert" name="tenant_auth_cert" required>
+        <textarea class="userdata" v-model="model.tenant.auth.cert"></textarea>
+        <!-- input v-model="model.tenant.auth.cert" id="tenant_auth_cert" name="tenant_auth_cert" required -->
       </div>
       <div class="line">
         <label for="tenant_auth_region">Region:</label>

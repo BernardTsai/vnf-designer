@@ -32,12 +32,12 @@ input, select {
   border-radius: 0px;
 }
 
-input, select {
+input, select, textarea {
   border: none;
   border-bottom: 1px solid darkgrey;
 }
 
-input:required, select:required {
+input:required, select:required, textarea:required {
   border-bottom: 1px solid red;
 }
 
