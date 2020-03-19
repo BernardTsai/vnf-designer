@@ -62,4 +62,4 @@ Usage
 -----
 In order to understand how to design a virtualised network function with the help of this tool please refer to following [documentation](usage.md).
 
-<div style="z-index:100; position: fixed; top: 16px; right: 16px;"><a style="text-decoration: none;" href="index.html">overview</a></div>
+<div style="z-index:100; position: fixed; top: 16px; right: 16px;"><a style="text-decoration: none;" href="doc.html">overview</a></div>

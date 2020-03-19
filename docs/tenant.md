@@ -34,4 +34,4 @@ The web-form for the tenant will be presented in the selector region on the left
 
 -----
 
-<div style="z-index:100; position: fixed; top: 16px; right: 16px;"><a style="text-decoration: none;" href="index.html?usage.md">usage</a></div>
+<div style="z-index:100; position: fixed; top: 16px; right: 16px;"><a style="text-decoration: none;" href="doc.html?usage.md">usage</a></div>

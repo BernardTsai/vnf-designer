@@ -46,7 +46,7 @@ Vue.component( 'appheader',
             tabs.style.display = "none"
             break
           case "Docs":
-            var win = window.open("/docs/index.html", '_blank');
+            var win = window.open("/docs/doc.html", '_blank');
             win.focus();
             break;
           default:
