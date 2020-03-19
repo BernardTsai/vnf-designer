@@ -8,7 +8,7 @@ Content
 
 * **[Introduction](introduction.md)**: capabilities of the VNF Designer
 * **[Installation](installation.md)**: instructions for setting up the VNF Designer
-* **[GUI](UI.md)**: graphical user interface of the VNF designer
+* **[GUI](ui.md)**: graphical user interface of the VNF designer
 * **[Usage](usage.md)**: how to design VNFs
 * **[Example](example.md)**: reference example
 * **[Model](model.md)**: description of the internal model
