@@ -1,0 +1,48 @@
+#networkform {
+  position: absolute;
+  left:     0px;
+  right:    0px;
+  top:      0px;
+  bottom:   0px;
+  padding:  8px;
+
+  overflow-y: scroll;
+}
+
+#networkform .header {
+  font-size:   20px;
+  font-weight: bold;
+}
+
+#networkform .subheader {
+  font-size:   14px;
+  font-weight: bolder;
+  padding-top: 24px;
+  padding-left: 8px;
+}
+
+#networkform .line {
+  padding-top: 8px;
+  padding-left: 24px;
+}
+
+#networkform .line label {
+  display:     inline-block;
+  width:       64px;
+  font-weight: bold;
+}
+
+#networkform .line label.top {
+  width:       200px;
+}
+
+
+#networkform .line input {
+  display:     inline-block;
+  width:       200px;
+}
+
+#networkform .line select {
+  display:     inline-block;
+  width:       200px;
+}

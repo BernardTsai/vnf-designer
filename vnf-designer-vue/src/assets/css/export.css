@@ -1,0 +1,66 @@
+#exportform {
+  position: absolute;
+  left:     0px;
+  right:    0px;
+  top:      0px;
+  bottom:   0px;
+  padding:  8px;
+
+  overflow-y: scroll;
+}
+
+#exportform .header {
+  position: absolute;
+  left:     0px;
+  right:    0px;
+  top:      0px;
+  height:   32px;
+  padding:  8px;
+
+  line-height: 32px;
+  font-size:   20px;
+  font-weight: bold;
+}
+
+#exportform .header .format {
+  float:            right;
+  font-size:        12px;
+  line-height:      32px;
+  border:           none;
+  vertical-align:   middle;
+  text-align:       center;
+  padding-right:    32px;
+}
+
+#exportform .header .format select {
+  display: inline-block;
+  width:   200px;
+}
+
+#exportform .header .button {
+  float:            right;
+  font-size:        12px;
+  line-height:      32px;
+  border:           none;
+  vertical-align:   middle;
+  text-align:       center;
+  padding-right:    32px;
+}
+
+#exportform .line {
+  position: absolute;
+  left:     0px;
+  right:    0px;
+  top:      32px;
+  bottom:   0px;
+  padding:  8px;
+
+  overflow:  scroll;
+}
+
+#exportform .line textarea {
+  width:     100%;
+  height:    100%;
+  font-size: 10px;
+  border:    1px solid lightgrey;
+}
