@@ -18,17 +18,9 @@
       <div @click="context('Export')" title="Export model">
         <i class="fas fa-arrow-alt-circle-up" />&nbsp;Export
       </div>
-      <div title="Documentation">
-        <a
-          target="_blank"
-          href="https://jgroom33.github.io/vnf-designer/#/docs"
-        >
-          <i class="fas fa-book" />&nbsp;Docs
-        </a>
-      </div>
-      <!-- <div @click="context('Docs')" v-if="window.location.hostname != ''">
+      <div @click="context('Docs')">
         <i class="fas fa-book" />&nbsp;Docs
-      </div> -->
+      </div>
     </div>
     <div id="apptabs" class="tabs">
       <template v-if="view.navigation === 'Tenant'">
@@ -120,7 +112,7 @@ export default {
           this.view.detail = "Export";
           break;
         case "Docs":
-          var win = window.open("/docs", "_blank");
+          var win = window.open(window.location.href+"docs", "_blank");
           win.focus();
           break;
         default:
