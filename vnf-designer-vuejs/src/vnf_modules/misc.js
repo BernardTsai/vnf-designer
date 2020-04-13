@@ -4,7 +4,7 @@
 // each IP? should either be an IP-address or a
 // range with the last octet defining the Range
 // e.g. 192.168.178.10-20
-function fixed_ips_filter(str) {
+export function fixed_ips_filter(str) {
   var pattern = /fixed:[^;]*/i
   var result  = []
 
@@ -45,7 +45,7 @@ function fixed_ips_filter(str) {
 // each IP? should either be an IP-address or a
 // range with the last octet defining the Range
 // e.g. 192.168.178.10-20
-function allowed_ips_filter(str) {
+export function allowed_ips_filter(str) {
   var pattern = /allowed:[^;]*/i
   var result  = []
 
@@ -84,7 +84,7 @@ function allowed_ips_filter(str) {
 // port_min_filter derives a min port number from a string
 // format: "portmin-portmax|port"
 // e.g. 8080-8081
-function port_min_filter(str) {
+export function port_min_filter(str) {
   parts = str.split("-")
 
   return (parts.length == 2 ? parts[0] : str )
@@ -93,14 +93,14 @@ function port_min_filter(str) {
 // port_max_filter derives a max port number from a string
 // format: "portmin-portmax|port"
 // e.g. 8080-8081
-function port_max_filter(str) {
+export function port_max_filter(str) {
   parts = str.split("-")
 
   return (parts.length == 2 ? parts[1] : str )
 }
 
 // generate_ip_range generates a list of IP addresses as an array
-function generate_ip_range( range ) {
+export function generate_ip_range( range ) {
   var result = []
 
   // split range and determine prefix and range
@@ -123,7 +123,7 @@ function generate_ip_range( range ) {
 }
 
 // empty model returns an empty model
-function emptyModel() {
+export function emptyModel() {
   return {
     vnf:        "",
     version:    "",
@@ -158,7 +158,7 @@ function emptyModel() {
 }
 
 // render a model into a template
-function render(model, template_name) {
+export function render(model, template_name) {
   var tmpl = templates[template_name]
   var env  = nunjucks.configure({trimBlocks: true})
 
@@ -173,7 +173,7 @@ function render(model, template_name) {
 // splitter splits up a txt along seperator lines
 // of the form "----- filename -----" and returns
 // a dictionary with the filenames as keys
-function splitter(txt) {
+export function splitter(txt) {
   var result   = {}
   var content  = ""
   var lines    = txt.split("\n")

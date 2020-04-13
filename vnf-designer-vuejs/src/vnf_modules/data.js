@@ -202,3 +202,4 @@ components:
     userdata:     ""
 
 `
+export { data }

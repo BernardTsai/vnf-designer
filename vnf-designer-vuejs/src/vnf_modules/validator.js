@@ -1,4 +1,4 @@
-var schema = {
+export var schema = {
   // "$schema":     "http://tsai.eu/vnfd-00-01-00/schema#",
   "title":       "VNF Desciptor",
   "description": "A simple VNF descriptor",
@@ -349,7 +349,7 @@ var schema = {
 
 //------------------------------------------------------------------------------
 
-function validate_schema(object) {
+export function validate_schema(object) {
   var ajv    = new Ajv(); // options can be passed, e.g. {allErrors: true}
   var verify = ajv.compile(schema);
   var valid  = verify(object);
@@ -365,7 +365,7 @@ function validate_schema(object) {
 
 //------------------------------------------------------------------------------
 
-function validate_xref(object) {
+export function validate_xref(object) {
 
   // construct lookups
   var flavors    = object.flavors.map( x => x.name )
