@@ -14,6 +14,8 @@ The rendering capabilities can be extended by simply adding new templates into t
 
 A model of a demo solution is provided as an example.
 
+For a quick evaluation simply use the service on github pages: https://bernardtsai.github.io/vnf-designer/
+
 For further questions please contact: bernard@tsai.eu
 
 # Quick start
