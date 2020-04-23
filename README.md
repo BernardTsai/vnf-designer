@@ -1,4 +1,8 @@
-# vnf-designer-vuejs
+# vnf-designer
+
+[Live Demo](https://bernardtsai.github.io/vnf-designer/)
+
+[![Try it!](simple_display.png)](https://bernardtsai.github.io/vnf-designer/)
 
 A simple webpage capable of:
 - modelling the networks, components (incl. images and flavors) and ports of VNFs,
@@ -13,8 +17,6 @@ This model can be rendered with the help of jinja alike templates into any kind 
 The rendering capabilities can be extended by simply adding new templates into templates.js.
 
 A model of a demo solution is provided as an example.
-
-For a quick evaluation simply use the service on github pages: https://bernardtsai.github.io/vnf-designer/
 
 For further questions please contact: bernard@tsai.eu
 
