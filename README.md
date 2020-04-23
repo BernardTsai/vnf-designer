@@ -1,4 +1,4 @@
-# vnf-designer
+# vnf-designer-vuejs
 
 A simple webpage capable of:
 - modelling the networks, components (incl. images and flavors) and ports of VNFs,
@@ -26,16 +26,30 @@ Prerequisites
 - nodeenv has been installed (optional - if a virtual node environment is needed)
 - access to OpenStack APIs (directly or via http/s_proxy settings)
 
-Steps
------
-- Clone the repository from github (https://github.com/BernardTsai/vnf-designer)
-- Change into the root directory
-- Create virtual node environment via "nodeenv --force ." (optional)
-- Start virtual node environment via "source bin/activate" (optional)
-- Install missing dependencies via "npm install"
-- Start server via "node index.js"
-- Open following url in a  browser: "http://localhost:3000"
+## Project setup
+```
+npm install
+```
 
-# Documentation
+### Compiles and hot-reloads for development
+```
+npm run serve
+```
 
-Further documentation can be found here: [...](docs/readme.md)
+### Compiles and minifies for production
+```
+npm run build
+```
+
+### Run your tests
+```
+npm run test
+```
+
+### Lints and fixes files
+```
+npm run lint
+```
+
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).
