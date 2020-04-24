@@ -1,0 +1,71 @@
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
+----- {{tenant.prefix}}{{component.name}} -----
+#!/usr/bin/env ansible-playbook
+---
+- name: Create security groups for ports of server {{component.name}}
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
+  vars_files:
+    - ../../../input/environment.yml
+  environment: "{{ '{{env_vars}}' }}"
+  tasks:
+
+{% for componentInterface in component.componentInterfaces %}
+  # ----- security group for {{tenant.prefix}}{{component.name}} componentInterface {{tenant.prefix}}{{componentInterface.network}} -----
+  - name: Create {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{componentInterface.network}} security group
+    os_security_group:
+      state:          present
+      name:           {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{componentInterface.network}}
+      description:    Security group for the {{tenant.prefix}}{{component.name}} {{tenant.prefix}}{{componentInterface.network}} componentInterface.
+      validate_certs: no
+    register: secgroup
+
+  # ----- reset all ingress security rules for {{tenant.prefix}}{{component.name}} componentInterface {{tenant.prefix}}{{componentInterface.network}} -----
+  - name: Delete all ingress {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{componentInterface.network}} security group rules
+    os_security_group_rule:
+      state:            absent
+      security_group:   {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{componentInterface.network}}
+      protocol:         "{{ '{{item.protocol}}' }}"
+      port_range_min:   "{{ '{{item.port_range_min}}' }}"
+      port_range_max:   "{{ '{{item.port_range_max}}' }}"
+      remote_ip_prefix: "{{ '{{item.remote_ip_prefix}}' }}"
+      direction:        ingress
+      validate_certs:   no
+    ignore_errors:      yes
+    loop: "{{ '{{secgroup.secgroup.security_group_rules}}' }}"
+    when: item.direction == "ingress"
+
+  # ----- security group rules for {{tenant.prefix}}{{component.name}} componentInterface {{tenant.prefix}}{{componentInterface.network}} -----
+  - name: Create {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{componentInterface.network}} security group rules
+    os_security_group_rule:
+      state:            present
+      security_group:   {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{componentInterface.network}}
+      protocol:         "{{ '{{item.protocol}}' }}"
+      port_range_min:   "{{ '{{item.port_range_min}}' }}"
+      port_range_max:   "{{ '{{item.port_range_max}}' }}"
+      remote_ip_prefix: "{{ '{{item.remote_ip_prefix}}' }}"
+      direction:        ingress
+      validate_certs:   no
+    ignore_errors:      yes
+    loop:
+    - {protocol: icmp, port_range_min: 0, port_range_max: 255, remote_ip_prefix: 0.0.0.0/0}
+{% for service in component.services %}{% if componentInterface.network == service.network %}
+{% for network in networks %}{% if componentInterface.network == network.name %}
+    - {protocol: {{service.protocol}}, port_range_min: {{service.range | portmin }}, port_range_max: {{service.range | portmax }}, remote_ip_prefix: {{network.ipv4}} }
+{% endif %}{% endfor %}
+{% endif %}{% endfor %}
+{% for service in component.services %}{% if componentInterface.network == service.network %}
+{% for component2 in components %}{% if component2.placement != 'ROUTER' %}
+{% for dependency in component2.dependencies %}{% if dependency.component == component.name %}{% if dependency.service == service.name %}
+{% for network2 in networks %}{% if dependency.network == network2.name %}
+    - {protocol: {{service.protocol}}, port_range_min: {{service.range | portmin }}, port_range_max: {{service.range | portmax }}, remote_ip_prefix: {{network2.ipv4}} }
+{% endif %}{% endfor %}
+{% endif %}{% endif %}{% endfor %}
+{% endif %}{% endfor %}
+{% endif %}{% endfor %}
+
+{% endfor %}
+{% endif %}{% endif %}{% endfor %}

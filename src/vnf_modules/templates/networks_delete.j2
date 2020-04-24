@@ -1,0 +1,31 @@
+#!/usr/bin/env ansible-playbook
+---
+- name: Delete networks
+  hosts:        localhost
+  connection:   local
+  gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
+  vars_files:
+    - ../../input/environment.yml
+  environment: "{{ '{{env_vars}}' }}"
+  tasks:
+    - name: Delete subnets
+      os_subnet:
+        state:          absent
+        name:           "{{ '{{item}}' }}_subnet"
+        validate_certs: no
+      loop:
+{% for network in networks %}{% if network.external != "true" %}
+      - {{tenant.prefix}}{{network.name}}
+{% endif %}{% endfor %}
+
+    - name: Delete networks
+      os_network:
+        state:          absent
+        name:           "{{ '{{item}}' }}"
+        validate_certs: no
+      loop:
+{% for network in networks %}{% if network.external != "true" %}
+      - {{tenant.prefix}}{{network.name}}
+{% endif %}{% endfor %}

@@ -1,0 +1,129 @@
+---
+schema:     {{schema}}
+vnf:        {{vnf}}
+version:    {{version}}
+tenant:
+  name:          "{{tenant.name}}"
+  prefix:        "{{tenant.prefix}}"
+  auth:
+    username:    "{{tenant.auth.username}}"
+    password:    "{{tenant.auth.password}}"
+    proxy:       "{{tenant.auth.proxy}}"
+    url:         "{{tenant.auth.url}}"
+{% if tenant.auth.cert == "" %}
+    cert:        ""
+{% else %}
+    cert:        |
+      {{tenant.auth.cert | indent(6, false) }}
+{% endif %}
+    region:      "{{tenant.auth.region}}"
+    vol_api:     "{{tenant.auth.vol_api}}"
+    plugin:      "{{tenant.auth.plugin}}"
+{% if tenant.service %}{% if tenant.service.network != "" %}
+  service:
+    network:     "{{tenant.service.network}}"
+    cidr:        "{{tenant.service.cidr}}"
+    gateway:     "{{tenant.service.gateway}}"
+    proxy:       "{{tenant.service.proxy}}"
+    port:        "{{tenant.service.port}}"
+{% endif %}{% endif%}
+  jumphost:      "{{tenant.jumphost}}"
+  proxy:
+    http:        "{{tenant.proxy.http}}"
+    https:       "{{tenant.proxy.https}}"
+flavors:
+{% for flavor in flavors %}
+  - uuid:    "{{flavor.uuid}}"
+    name:    "{{flavor.name}}"
+    vcpu:    {{flavor.vcpu}}
+    ram:     {{flavor.ram}}
+    disk:    {{flavor.disk}}
+    public:  "{{flavor.public}}"
+{% if flavor.special|length == 0 %}
+    special: []
+{% endif -%}
+{% if flavor.special|length >  0 %}
+    special:
+{% endif -%}
+{% for special in flavor.special %}
+      - { key: "{{special.key}}", value: "{{special.value}}" }
+{% endfor %}
+{% endfor %}
+images:
+{% for image in images %}
+  - { uuid: "{{image.uuid}}", name: "{{image.name}}", version: "{{image.version}}", format: "{{image.format}}", container: "{{image.container}}", disk: "{{image.disk}}", size: "{{image.size}}", checksum: "{{image.checksum}}", url: "{{image.url}}", special: "{{image.special}}" }
+{% endfor %}
+networks:
+{% for network in networks%}
+  - uuid:      "{{network.uuid}}"
+    name:      "{{network.name}}"
+    external:  "{{network.external}}"
+    ipv4:      "{{network.ipv4}}"
+    ipv4gw:    "{{network.ipv4gw}}"
+    ipv4start: "{{network.ipv4start}}"
+    ipv4end:   "{{network.ipv4end}}"
+    ipv6:      "{{network.ipv6}}"
+    ipv6gw:    "{{network.ipv6gw}}"
+    ipv6start: "{{network.ipv6start}}"
+    ipv6end:   "{{network.ipv6end}}"
+    route:     "{{network.route}}"
+    export:    "{{network.export}}"
+    import:    "{{network.import}}"
+    special:   "{{network.special}}"
+{% endfor %}
+components:
+{% for component in components %}
+  - uuid:         "{{component.uuid}}"
+    name:         "{{component.name}}"
+    user:         "{{component.user}}"
+    placement:    "{{component.placement}}"
+    flavor:       "{{component.flavor}}"
+    image:        "{{component.image}}"
+    min:          {{component.min}}
+    size:         {{component.size}}
+    max:          {{component.max}}
+{% if component.volumes|length == 0 %}
+    volumes:      []
+{% endif -%}
+{% if component.volumes|length >  0 %}
+    volumes:
+{% endif -%}
+{% for volume in component.volumes %}
+      - { name: "{{volume.name}}", size: {{volume.size}}, type: "{{volume.type}}", attributes: "{{volume.attributes}}" }
+{% endfor %}
+{% if component.componentInterfaces|length == 0 %}
+    componentInterfaces:   []
+{% endif -%}
+{% if component.componentInterfaces|length >  0 %}
+    componentInterfaces:
+{% endif -%}
+{% for componentInterface in component.componentInterfaces %}
+      - { network: "{{componentInterface.network}}", attributes: "{{componentInterface.attributes}}" }
+{% endfor %}
+{% if component.services|length == 0 %}
+    services:     []
+{% endif -%}
+{% if component.services|length >  0 %}
+    services:
+{% endif -%}
+{% for service in component.services %}
+      - { name: "{{service.name}}", network: "{{service.network}}", protocol: "{{service.protocol}}", range: "{{service.range}}" }
+{% endfor %}
+{% if component.dependencies|length == 0 %}
+    dependencies: []
+{% endif -%}
+{% if component.dependencies|length >  0 %}
+    dependencies:
+{% endif -%}
+{% for dependency in component.dependencies %}
+      - { component: "{{dependency.component}}", service: "{{dependency.service}}", network: "{{dependency.network}}" }
+{% endfor %}
+{% if component.userdata == "" %}
+    userdata:     ""
+{% endif -%}
+{% if component.userdata != "" %}
+    userdata: |
+      {{ component.userdata | indent(6) | safe }}
+{% endif -%}
+
+{% endfor %}

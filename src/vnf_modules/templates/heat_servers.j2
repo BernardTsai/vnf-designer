@@ -1,0 +1,63 @@
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% for index in range(component.max) %}{% if component.max == 1 %}{% set component_name = component.name %}{% else %}{% set component_name = component.name + "-" + (index+1) %}{% endif %}
+----- {{tenant.prefix}}{{component_name}} -----
+heat_template_version: 2015-04-30
+resources:
+{% for componentInterface in component.componentInterfaces %}
+  # ----- Port: {{tenant.prefix}}{{componentInterface.network}} for {{tenant.prefix}}{{component_name}} -----
+  {{tenant.prefix}}{{component_name}}_{{tenant.prefix}}{{componentInterface.network}}:
+     type: OS::Neutron::Port
+     properties:
+       name:                  "{{tenant.prefix}}{{component_name}}_{{tenant.prefix}}{{componentInterface.network}}"
+       network:               "{{tenant.prefix}}{{componentInterface.network}}"
+       security_groups:       [ "{{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{componentInterface.network}}" ]
+       port_security_enabled: true
+       admin_state_up:        true
+{% if componentInterface.attributes|allowed|length > 0 %}
+       allowed_address_pairs:
+{% for allowed in componentInterface.attributes|allowed %}
+         - ip_address: {{allowed}}
+{% endfor %}{% endif %}
+{% if componentInterface.attributes|fixed|length > 0 %}
+       fixed_ips:
+{% for fixed in componentInterface.attributes|fixed %}
+         - ip_address: {{fixed}}
+{% endfor %}{% endif %}
+
+{% endfor %}
+
+{% for volume in component.volumes %}
+  # ----- Volume: {{volume.name}} volume for {{tenant.prefix}}{{component_name}} -----
+  {tenant.prefix}}{{component_name}}_{{volume.name}}:
+    type: OS::Cinder::Volume
+    properties:
+      name:           "{{tenant.prefix}}{{component_name}}_{{volume.name}}"
+      size:           {{volume.size}}
+{% endfor %}
+
+  # ----- Server: {{tenant.prefix}}{{component_name}} -----
+  {{component_name}}:
+    type: OS::Nova::Server
+    properties:
+      name:         "{{component_name}}"
+      flavor:       "{{component.flavor}}"
+      image:        "{{component.image}}"
+      key_name:     "admin"
+      config_drive: true
+{% if component.userdata != "" %}
+      userdata: |
+        {{ component.userdata | indent(8) | safe }}
+{% endif %}
+      networks:
+{% for componentInterface in component.componentInterfaces %}
+        - port: { get_resource: {{tenant.prefix}}{{component_name}}_{{tenant.prefix}}{{componentInterface.network}} }
+{% endfor %}
+{% if component.volumes|length > 0 %}
+      block_device_mapping
+{% set devices = [ '', '/dev/vda', '/dev/vdb', '/dev/vdc', '/dev/vdd', '/dev/vde', '/dev/vdf', '/dev/vdg', '/dev/vdh', '/dev/vdi', '/dev/vdj' ] %}
+{% for volume in component.volumes %}
+        - device_name: {{ devices[loop.index] }}
+          volume_id:   { get_resource: {{tenant.prefix}}{{component_name}}_{{volume.name}} }
+{% endfor %}
+{% endif %}
+
+{% endfor %}{% endif %}{% endif %}{% endfor %}

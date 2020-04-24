@@ -1,0 +1,98 @@
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% for index in range(component.max) %}{% if component.max == 1 %}{% set component_name = component.name %}{% else %}{% set component_name = component.name + "-" + (index+1) %}{% endif %}
+----- {{tenant.prefix}}{{component_name}} -----
+#!/usr/bin/env ansible-playbook
+---
+- name: Create server {{tenant.prefix}}{{component_name}}
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
+  vars_files:
+    - ../../../input/environment.yml
+  environment: "{{ '{{env_vars}}' }}"
+  tasks:
+{% for componentInterface in component.componentInterfaces %}
+  # ----- {{componentInterface.network}} port for {{tenant.prefix}}{{component_name}} -----
+  - name: Create {{componentInterface.network}} port for {{tenant.prefix}}{{component_name}}
+    os_port:
+      state:          present
+      name:           "{{tenant.prefix}}{{component_name}}_{{tenant.prefix}}{{componentInterface.network}}"
+      network:        "{{tenant.prefix}}{{componentInterface.network}}"
+      validate_certs: no
+      security_groups:
+      - "{{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{componentInterface.network}}"
+{% if componentInterface.attributes|allowed|length > 0 %}
+      allowed_address_pairs:
+{% for allowed in componentInterface.attributes|allowed %}
+      - ip_address: {{allowed}}
+{% endfor %}{% endif %}
+{% if componentInterface.attributes|fixed|length > 0 %}
+      fixed_ips:
+{% for fixed in componentInterface.attributes|fixed %}
+      - ip_address: {{fixed}}
+{% endfor %}{% endif %}
+
+{% endfor %}
+
+  # ----- {{component_name}} virtual machine -----
+  - name: Create virtual machine for {{component_name}} server
+    os_server:
+      state:          present
+      name:           {{tenant.prefix}}{{component_name}}
+      flavor:         "{{component.flavor}}"
+      image:          "{{component.image}}"
+      key_name:       fiveg_key
+      config_drive:   yes
+      auto_ip:        no
+      timeout:        600
+      validate_certs: no
+      nics:
+{% for componentInterface in component.componentInterfaces %}
+        - port-name: {{tenant.prefix}}{{component_name}}_{{tenant.prefix}}{{componentInterface.network}}
+{% endfor %}
+      meta:
+       hostname: {{tenant.prefix}}{{component_name}}
+{% if component.userdata != "" %}
+      userdata: |
+        {{ component.userdata | indent(8) | safe }}
+{% endif %}
+
+{% if component.name == "jumphost" %}{% if tenant.jumphost != "" %}
+  # ----- floating IP for jumphost -----
+  - name: Determine {{tenant.prefix}}jumphost_{{tenant.prefix}}oam port information
+    os_port_facts:
+      port:           "{{tenant.prefix}}jumphost_{{tenant.prefix}}oam"
+      validate_certs: no
+    register: jumphost_oam_facts
+
+  - name: Assign floating IP to jumphost
+    os_floating_ip:
+      state:               present
+      server:              {{tenant.prefix}}jumphost
+      floating_ip_address: "{{tenant.jumphost}}"
+      fixed_address:       "{{ '{{' }} jumphost_oam_facts.ansible_facts.openstack_ports[0].fixed_ips[0].ip_address {{ '}}' }}"
+      validate_certs:      no
+
+{% endif %}{% endif %}
+
+{% for volume in component.volumes %}
+  # ----- {{volume.name}} volume for {{tenant.prefix}}{{component_name}} -----
+  - name: Create {{volume.name}} volume for {{tenant.prefix}}{{component_name}}
+    os_volume:
+      state:          present
+      name:           "{{tenant.prefix}}{{component_name}}_{{volume.name}}"
+      size:           {{volume.size}}
+      display_name:   "{{volume.name}} volume for {{tenant.prefix}}{{component_name}}"
+      validate_certs: no
+
+  - name: Attach volume {{volume.name}} to {{tenant.prefix}}{{component_name}}
+    os_server_volume:
+      state:          present
+      server:         "{{tenant.prefix}}{{component_name}}"
+      volume:         "{{tenant.prefix}}{{component_name}}_{{volume.name}}"
+      validate_certs: no
+
+{% endfor %}
+
+{% endfor %}{% endif %}{% endif %}{% endfor %}

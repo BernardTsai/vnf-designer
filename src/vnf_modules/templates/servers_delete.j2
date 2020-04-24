@@ -1,0 +1,43 @@
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% for index in range(component.max) %}{% if component.max == 1 %}{% set component_name = component.name %}{% else %}{% set component_name = component.name + "-" + (index+1) %}{% endif %}
+----- {{tenant.prefix}}{{component_name}} -----
+#!/usr/bin/env ansible-playbook
+---
+- name: Delete server {{component_name}}
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
+  vars_files:
+    - ../../../input/environment.yml
+  environment: "{{ '{{env_vars}}' }}"
+  tasks:
+{% for componentInterface in component.componentInterfaces %}
+  # ----- {{tenant.prefix}}{{componentInterface.network}} port for {{tenant.prefix}}{{component_name}} -----
+  - name: Delete {{tenant.prefix}}{{componentInterface.network}} port for {{tenant.prefix}}{{component_name}}
+    os_port:
+      state:          absent
+      name:           "{{tenant.prefix}}{{component_name}}_{{tenant.prefix}}{{componentInterface.network}}"
+      network:        "{{tenant.prefix}}{{componentInterface.network}}"
+      validate_certs: no
+
+{% endfor %}
+
+  # ----- {{tenant.prefix}}{{component_name}} virtual machine -----
+  - name: Delete virtual machine for {{tenant.prefix}}{{component_name}} server
+    os_server:
+      state:          absent
+      name:           {{tenant.prefix}}{{component_name}}
+      validate_certs: no
+
+{% for volume in component.volumes %}
+  # ----- {{volume.name}} volume for {{tenant.prefix}}{{component_name}} -----
+  - name: Delete {{volume.name}} volume for {{tenant.prefix}}{{component_name}}
+    os_volume:
+      state:          absent
+      name:           "{{tenant.prefix}}{{component_name}}_{{volume.name}}"
+      validate_certs: no
+
+{% endfor %}
+
+{% endfor %}{% endif %}{% endif %}{% endfor %}

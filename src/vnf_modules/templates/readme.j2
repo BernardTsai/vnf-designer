@@ -1,0 +1,51 @@
+README
+======
+
+VNF:     {{vnf}}
+Version: {{version}}
+Tenant:  {{tenant.name}}
+Prefix:  {{tenant.prefix}}
+
+Prequisites
+-----------
+- access to OpenStack API
+- ansible installed
+- openstack client installed
+- input directory (next to the directory containing this readme):
+  - id_rsa (private key for accessing the virtual machines)
+  - openstack.crt (certificate file of OpenStack API)
+  - authorized_keys (file with all public keys to be uploaded to VMs)
+
+Preparation
+-----------
+- source ./setup.sh
+
+Usage
+-----
+
+create and delete the whole infrastructure
+determine status of the whole infrastructure
+distribute keys to all servers and
+connct to a specific server
+- infrastructure_create.sh
+- infrastructure_delete.sh
+- infrastructure_status.sh
+- infrastructure_authorize.sh
+- infrastructure_connect.sh <server>
+
+create, delete and determine status of networks:
+- ./elements/networks/create.yml
+- ./elements/networks/delete.yml
+- ./elements/networks/status.yml
+
+create, delete security policies:
+- ./elements/servers/<server>/define_security.yml
+- ./elements/servers/<server>/undefine_security.yml
+
+create, delete and determine status of servers:
+- ./elements/servers/<server>/create.yml
+- ./elements/servers/<server>/delete.yml
+- ./elements/servers/status.yml
+
+distribute ssh keys to servers:
+- ./elements/servers/<server>/ssh.yml

@@ -1,0 +1,42 @@
+#!/usr/bin/env ansible-playbook
+---
+- name: Create networks
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
+  vars_files:
+    - ../../input/environment.yml
+  environment: "{{ '{{env_vars}}' }}"
+  tasks:
+{% for network in networks %}{% if network.external != "true" %}
+  - name: Create {{network.name}} network
+    os_network:
+      state:          present
+      name:           {{tenant.prefix}}{{network.name}}
+      validate_certs: no
+
+  - name: Create {{network.name}} subnet
+    os_subnet:
+      state:                 present
+      network_name:          {{tenant.prefix}}{{network.name}}
+      name:                  {{tenant.prefix}}{{network.name}}_subnet
+      cidr:                  {{network.ipv4}}
+      allocation_pool_start: {{network.ipv4start}}
+      allocation_pool_end:   {{network.ipv4end}}
+      validate_certs:        no
+
+{% if network.ipv6 != "" %}
+  - name: Create {{network.name}} subnet2
+    os_subnet:
+      state:                 present
+      network_name:          {{tenant.prefix}}{{network.name}}
+      name:                  {{tenant.prefix}}{{network.name}}_subnet2
+      cidr:                  {{network.ipv6}}
+      allocation_pool_start: {{network.ipv6start}}
+      allocation_pool_end:   {{network.ipv6end}}
+      validate_certs:        no
+
+{% endif %}
+{% endif %}{% endfor %}

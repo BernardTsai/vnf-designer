@@ -1,0 +1,28 @@
+---
+# file: environment.yml
+
+# ----- environment variables -----
+env_vars:
+  OS_TENANT_NAME:             "{{tenant.name}}"
+  OS_PROJECT_NAME:            "{{tenant.name}}"
+  OS_USERNAME:                "{{tenant.auth.username}}"
+  OS_PASSWORD:                "{{tenant.auth.password}}"
+  OS_API_PROXY:               "{{tenant.auth.proxy}}"
+  OS_AUTH_URL:                "{{tenant.auth.url}}"
+  OS_CACERT:                  "{{tenant.auth.cert}}"
+  OS_REGION_NAME:             "{{tenant.auth.region}}"
+  OS_VOLUME_API_VERSION:      "{{tenant.auth.vol_api}}"
+  OS_AUTH_PLUGIN:             "{{tenant.auth.plugin}}"
+
+  SERVICE_NETWORK:            "{{tenant.service.network}}"
+  SERVICE_CIDR:               "{{tenant.service.cidr}}"
+  SERVICE_GATEWAY:            "{{tenant.service.gateway}}"
+  PROXY_ADDRESS:              "{{tenant.service.proxy}}"
+  PROXY_PORT:                 "{{tenant.service.port}}"
+  JUMPHOST:                   "{{tenant.jumphost}}"
+{% if tenant.proxy.http %}{% if tenant.proxy.http != '' %}
+  http_proxy:                 "{{tenant.proxy.http}}"
+{% endif %}{% endif %}
+{% if tenant.proxy.https %}{% if tenant.proxy.https != '' %}
+  https_proxy:                "{{tenant.proxy.https}}"
+{% endif %}{% endif %}

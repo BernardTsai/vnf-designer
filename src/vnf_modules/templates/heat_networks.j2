@@ -1,0 +1,64 @@
+heat_template_version: 2015-04-30
+resources:
+{% for network in networks %}{% if network.external != "true" %}
+  {{tenant.prefix}}{{network.name}}:
+    type: OS::Neutron::Net
+    properties:
+      name:                  "{{tenant.prefix}}{{network.name}}"
+      admin_state_up:        true
+      port_security_enabled: true
+      shared:                false
+
+{% if network.ipv4 != "" %}
+  {{tenant.prefix}}{{network.name}}_v4:
+    type: OS::Neutron::Subnet
+    properties:
+      name:              "{{tenant.prefix}}{{network.name}}_v4"
+      network:           { get_attr: [{{tenant.prefix}}{{network.name}}, name] }
+      cidr:              {{network.ipv4}}
+      ip_version:        4
+      allocation_pools: [{ "start": {{network.ipv4start}}, "end": {{network.ipv4end}} }]
+      gateway_ip:       {{network.ipv4gw}}
+      enable_dhcp:      true
+{% endif %}
+
+{% if network.ipv6 != "" %}
+  {{tenant.prefix}}{{network.name}}_v6:
+    type: OS::Neutron::Subnet
+    properties:
+      name:              "{{tenant.prefix}}{{network.name}}_v6"
+      network:           { get_attr: [{{tenant.prefix}}{{network.name}}, name] }
+      cidr:              {{network.ipv6}}
+      ip_version:        6
+      allocation_pools: [{ "start": {{network.ipv6start}}, "end": {{network.ipv6end}} }]
+      gateway_ip:       {{network.ipv6gw}}
+      enable_dhcp:      true
+{% endif %}{% endif %}{% endfor %}
+
+{% for component in components %}{% if component.placement == 'ROUTER' %}
+  {{tenant.prefix}}{{component.name}}:
+     type: OS::Neutron::Router
+     properties:
+       name:           "{{tenant.prefix}}{{component.name}}"
+       admin_state_up: true
+
+{% for componentInterface in component.componentInterfaces %}{% for network in networks %}{% if network.name == componentInterface.network %}
+{% if network.ipv4 != "" %}
+  {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{componentInterface.network}}:
+    type: OS::Neutron::RoutercomponentInterface
+    properties:
+      router: { get_attr: [{{tenant.prefix}}{{component.name}}, name] }
+      subnet: { get_attr: [{{tenant.prefix}}{{network.name}}_v4, name] }
+
+{% endif %}
+{% if network.ipv6 != "" %}
+  {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{componentInterface.network}}:
+    type: OS::Neutron::RoutercomponentInterface
+    properties:
+      router: { get_attr: [{{tenant.prefix}}{{component.name}}, name] }
+      subnet: { get_attr: [{{tenant.prefix}}{{network.name}}_v6, name] }
+
+{% endif %}
+{% endif %}{% endfor %}{% endfor %}
+
+{% endif %}{% endfor %}

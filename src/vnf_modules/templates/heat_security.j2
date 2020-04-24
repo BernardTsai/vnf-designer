@@ -1,0 +1,29 @@
+heat_template_version: 2015-04-30
+resources:
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}
+{% for componentInterface in component.componentInterfaces %}
+  {{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{componentInterface.network}}:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name:        "{{tenant.prefix}}{{component.name}}_{{tenant.prefix}}{{componentInterface.network}}"
+      rules:
+        - {protocol: icmp, port_range_min: 0, port_range_max: 255,   remote_ip_prefix: 0.0.0.0/0}
+        - {protocol: tcp,  port_range_min: 0, port_range_max: 65535, remote_ip_prefix: 0.0.0.0/0}
+        - {protocol: udp,  port_range_min: 0, port_range_max: 65535, remote_ip_prefix: 0.0.0.0/0}
+{% for service in component.services %}{% if componentInterface.network == service.network %}
+{% for network in networks %}{% if componentInterface.network == network.name %}
+        - {protocol: {{service.protocol}}, port_range_min: {{service.range | portmin }}, port_range_max: {{service.range | portmax }}, remote_ip_prefix: {{network.ipv4}} }
+{% endif %}{% endfor %}
+{% endif %}{% endfor %}
+{% for service in component.services %}{% if componentInterface.network == service.network %}
+{% for component2 in components %}{% if component2.placement != 'ROUTER' %}
+{% for dependency in component2.dependencies %}{% if dependency.component == component.name %}{% if dependency.service == service.name %}
+{% for network2 in networks %}{% if dependency.network == network2.name %}
+        - {protocol: {{service.protocol}}, port_range_min: {{service.range | portmin }}, port_range_max: {{service.range | portmax }}, remote_ip_prefix: {{network2.ipv4}} }
+{% endif %}{% endfor %}
+{% endif %}{% endif %}{% endfor %}
+{% endif %}{% endfor %}
+{% endif %}{% endfor %}
+
+{% endfor %}
+{% endif %}{% endif %}{% endfor %}

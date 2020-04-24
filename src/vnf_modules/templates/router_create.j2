@@ -1,0 +1,28 @@
+{% for component in components %}{% if component.placement == 'ROUTER' %}
+----- {{tenant.prefix}}{{component.name}} -----
+#!/usr/bin/env ansible-playbook
+---
+- name: Create router {{component.name}}
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    ansible_python_interpreter: "{{ '{{ansible_playbook_python}}' }}"
+  vars_files:
+    - ../../../input/environment.yml
+  environment: "{{ '{{env_vars}}' }}"
+  tasks:
+
+  # ----- {{tenant.prefix}}{{component.name}} router -----
+  - name: Create router {{tenant.prefix}}{{component.name}}
+    os_router:
+      state:          present
+      name:           {{tenant.prefix}}{{component.name}}
+      validate_certs: no
+      componentInterface:
+{% for componentInterface in component.componentInterfaces %}
+      - subnet: {{tenant.prefix}}{{componentInterface.network}}_subnet
+{% endfor %}
+
+
+{% endif %}{% endfor %}

@@ -9,28 +9,28 @@ export function fixed_ips_filter(str) {
   var result  = []
 
   // extract the fixed ips part of the string
-  str1 = str.match(pattern)
+  var str1 = str.match(pattern)
 
   if ( !str1 ) {
     return result
   }
 
   // get first occurence
-  str2 = str1[0]
+  var str2 = str1[0]
 
   // remove the prefix: "fixed: "
-  str3 = str2.substr(7)
+  var str3 = str2.substr(7)
 
   // split into substrings
-  str4 = str3.split(",")
+  var str4 = str3.split(",")
 
   // construct the result
-  for (str5 of str4) {
+  for (var str5 of str4) {
     // check if we have a range
     if (str5.indexOf("-") < 0) {
       result.push(str5)
     } else {
-      for (str6 of generate_ip_range(str5) ) {
+      for (var str6 of generate_ip_range(str5) ) {
         result.push(str6)
       }
     }
@@ -50,28 +50,28 @@ export function allowed_ips_filter(str) {
   var result  = []
 
   // extract the allowed ips part of the string
-  str1 = str.match(pattern)
+  var str1 = str.match(pattern)
 
   if ( !str1 ) {
     return result
   }
 
   // get first occurence
-  str2 = str1[0]
+  var str2 = str1[0]
 
   // remove the prefix: "allowed: "
-  str3 = str2.substr(9)
+  var str3 = str2.substr(9)
 
   // split into substrings
-  str4 = str3.split(",")
+  var str4 = str3.split(",")
 
   // construct the result
-  for (str5 of str4) {
+  for (var str5 of str4) {
     // check if we have a range
     if (str5.indexOf("-") < 0) {
       result.push(str5)
     } else {
-      for (str6 of generate_ip_range(str5) ) {
+      for (var str6 of generate_ip_range(str5) ) {
         result.push(str6)
       }
     }
@@ -85,7 +85,7 @@ export function allowed_ips_filter(str) {
 // format: "portmin-portmax|port"
 // e.g. 8080-8081
 export function port_min_filter(str) {
-  parts = str.split("-")
+  var parts = str.split("-")
 
   return (parts.length == 2 ? parts[0] : str )
 }
@@ -94,7 +94,7 @@ export function port_min_filter(str) {
 // format: "portmin-portmax|port"
 // e.g. 8080-8081
 export function port_max_filter(str) {
-  parts = str.split("-")
+  var parts = str.split("-")
 
   return (parts.length == 2 ? parts[1] : str )
 }
@@ -104,14 +104,14 @@ export function generate_ip_range( range ) {
   var result = []
 
   // split range and determine prefix and range
-  pos    = range.lastIndexOf(".")
-  prefix = range.substr(0,pos)
-  rng    = range.substr(pos+1)
+  var pos    = range.lastIndexOf(".")
+  var prefix = range.substr(0,pos)
+  var rng    = range.substr(pos+1)
 
   // split the range and determine first and last index
-  parts = rng.split("-")
-  first = parseInt( parts[0], 10)
-  last  = parseInt( parts[1], 10)
+  var parts = rng.split("-")
+  var first = parseInt( parts[0], 10)
+  var last  = parseInt( parts[1], 10)
 
   // construct the result
   for (var index = first; index <= last; index++) {
@@ -180,8 +180,8 @@ export function splitter(txt) {
   var filename = ""
 
   // loop over all lines
-  for (const line of lines) {
-    seperator = line.match("----- .* -----")
+  for (var line of lines) {
+    var seperator = line.match("----- .* -----")
     if (seperator && seperator[0] == line) {
       // store current content
       if (filename != "" && content != "") {

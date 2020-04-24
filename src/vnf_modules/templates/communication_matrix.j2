@@ -1,0 +1,8 @@
+From                |Network |To                  |Service   |Protocol|Port (range)    |Network
+{% for component1 in components %}{% for dependency in component1.dependencies %}
+{% for component2 in components %}{% if component2.name == dependency.component %}
+{% for service in component2.services %}{% if service.name == dependency.service %}
+{{(component1.name    + '                    ') | truncate(20,false,'') }}|{{(dependency.network + '        ') | truncate(8,false,'') }}|{{(component2.name + '                    ') | truncate(20,false,'') }}|{{(service.name + '          ') | truncate(10,false,'') }}|{{(service.protocol + '        ') | truncate(8,false,'')  }}|{{(service.range      + '                ') | truncate(16,false,'') }}|{{(service.network    + '      ') | truncate(6,false,'')  }}
+{% endif %}{% endfor %}
+{% endif %}{% endfor %}
+{% endfor %}{% endfor %}

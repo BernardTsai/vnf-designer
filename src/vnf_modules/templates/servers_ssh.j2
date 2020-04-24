@@ -1,0 +1,22 @@
+{% for component in components %}{% if component.placement != 'OTHER' %}{% if component.placement != 'ROUTER' %}{% if component.user != '' %}{% for index in range(component.max) %}{% if component.max == 1 %}{% set component_name = component.name %}{% else %}{% set component_name = component.name + "-" + (index+1) %}{% endif %}
+----- {{tenant.prefix}}{{component_name}} -----
+#!/usr/bin/env ansible-playbook
+---
+- name: Determine index of server
+  hosts: localhost
+  gather_facts: false
+  tasks:
+- name: Update ssh keys for server '{{tenant.prefix}}{{component_name}}'
+  hosts: "{{component_name}}"
+  gather_facts: false
+  tasks:
+    - name: Update authorized keys file for server '{{tenant.prefix}}{{component_name}}'
+      authorized_key:
+        user: '{{ component.user }}'
+        key: "{{ '{{ item }}' }}"
+        state: present
+        exclusive: True
+      become: yes
+      with_file:
+        - ../../../input/authorized_keys
+{% endfor %}{% endif %}{% endif %}{% endif %}{% endfor %}
