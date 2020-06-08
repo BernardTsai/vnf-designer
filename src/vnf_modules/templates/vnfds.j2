@@ -1,0 +1,60 @@
+---
+{% for component in components %}
+- vnfProductInfoName: 'TODO: Training FortiGate VNF'
+  vnfdId: "{{component.name}}"
+  exportedModelVersion: "{{component.version}}"
+  vnfdOperationalState: ENABLED
+  vnfdProductName: 'TODO: Training FortiOS VNF'
+  vnfSoftwareVersion: 'TODO: 1.0'
+  vnfdVersion: 'TODO: 1.0'
+  vnfProvider: 'TODO: Fortinet'
+  vdus:
+  - intCpd:
+  {% for network in networks %}
+  - "{{ network.name }}"
+  {% endfor %}
+  vduId: "{{ component.name }}_base_vdu"
+  virtualComputeDesc: "{{ component.name }}_base"
+  name: "{{ component.name }} Base VDU"
+  swImageDesc: "{{ component.image }}"
+  virtualComputeDescs:
+  - virtualMemory:
+      virtualMemSize: 1024
+  virtualComputeDescId: "{{ component.name }}_base"
+  virtualCpu:
+      numVirtualCpu: 1
+  vduProfiles:
+  - minNumberOfInstances: "{{component.min}}"
+  vduProfileId: "{{ component.name }}_base_vdu_profile"
+  maxNumberOfInstances: "{{component.max}}"
+  vduId: "{{ component.name }}_base_vdu"
+  softwareImages:
+  - fortios_qcow2
+  instantiationLevels:
+  - levelId: base_level_1
+  vduLevel:
+  - vduLevelId: base_vdu_level_1
+      numberOfInstances: 1
+      vduId: "{{ component.name }}_base_vdu"
+  vnfExtCpds:
+  {%- for network in networks %}
+  - intCpd: "{{ network.name }}"
+    cpd:
+      cpdId: ext_{{ network.name }}
+  {% endfor %}
+  intCpds:
+  {%- for network in networks %}
+  - cpd:
+      cpdId: "{{ network.name }}"
+  {%- endfor %}
+  deploymentFlavors:
+  - vduProfile:
+  - "{{ component.name }}_base_vdu_profile"
+  defaultInstantiationLevel: base_level_1
+  vnfLcmOperationsConfiguration:
+      scaleVnfOpConfig:
+      scalingByMoreThanOneStepSupported: false
+  flavourId: base
+  instantiationLevel:
+  - base_level_1
+{% endfor %}
