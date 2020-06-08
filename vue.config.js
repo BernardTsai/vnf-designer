@@ -1,6 +1,6 @@
 // vue.config.js
 module.exports = {
-  publicPath: "/",
+  publicPath: "/vnf-designer/",
   configureWebpack: {
     module: {
       rules: [
