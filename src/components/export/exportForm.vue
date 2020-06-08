@@ -21,8 +21,11 @@
     </div>
 </template>
 <script>
-import nunjucks from 'nunjucks'
-import { fixed_ips_filter, allowed_ips_filter, port_min_filter, port_max_filter } from '../../vnf_modules/misc'
+import jsyaml    from 'js-yaml'
+import nunjucks  from 'nunjucks'
+import JSZip     from 'jszip'
+import { files } from '../../vnf_modules/files'
+import { render, fixed_ips_filter, allowed_ips_filter, port_min_filter, port_max_filter, splitter } from '../../vnf_modules/misc'
 export default {
 props:    ['model','view','templates'],
     methods: {
@@ -183,14 +186,14 @@ props:    ['model','view','templates'],
         // export networks and servers template file
         // export ansible cfg file
         input.file(     "ansible.cfg",    files['ansible.cfg'])
-        this.templates.file( "networks.tmpl",  files['networks.tmpl'])
-        this.templates.file( "servers.tmpl",   files['servers.tmpl'])
-        this.templates.file( "config",         files['config'])
-        this.templates.file( "inventory",      files['inventory'])
+        templates.file( "networks.tmpl",  files['networks.tmpl'])
+        templates.file( "servers.tmpl",   files['servers.tmpl'])
+        templates.file( "config",         files['config'])
+        templates.file( "inventory",      files['inventory'])
         output.file(    "inventory",      files['default_inventory'])
 
         var txt = render(this.model, "config")
-        this.templates.file("config", txt, {unixPermissions: "644"})
+        templates.file("config", txt, {unixPermissions: "644"})
 
         // export router creation files
         var txt  = render(this.model, "Router (create)")
@@ -213,12 +216,13 @@ props:    ['model','view','templates'],
         }
 
         // generate blob
+        var self = this
         zip.generateAsync({type:"blob"})
         .then(function(content) {
           var element  = document.createElement('a');
 
           element.setAttribute('href', URL.createObjectURL(content) )
-          element.setAttribute('download', this.model.vnf + "-V" + this.model.version + ".zip");
+          element.setAttribute('download', self.model.vnf + "-V" + self.model.version + ".zip");
 
           element.style.display = 'none';
           document.body.appendChild(element);

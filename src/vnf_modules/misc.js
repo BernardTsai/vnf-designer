@@ -1,3 +1,5 @@
+import nunjucks      from 'nunjucks'
+import { templates } from './templates.js'
 
 // fixed_ips_filter derives a list of fixed IPs from a string
 // format: "fixed: IP1, IP2, IP3, ...;"
