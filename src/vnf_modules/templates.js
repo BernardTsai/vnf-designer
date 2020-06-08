@@ -21,6 +21,7 @@ import config                    from './templates/config.j2'
 import heat_networks             from './templates/heat_networks.j2'
 import heat_security             from './templates/heat_security.j2'
 import heat_servers              from './templates/heat_servers.j2'
+import vnfds                     from './templates/vnfds.j2'
 
 var templates = {}
 
@@ -47,5 +48,6 @@ templates['config']                      = config
 templates['HEAT Networks']               = heat_networks
 templates['HEAT Security']               = heat_security
 templates['HEAT Servers']                = heat_servers
+templates['VNF descriptors (ETSI/MANO)'] = vnfds
 
 export  { templates }
