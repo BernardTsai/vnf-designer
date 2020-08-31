@@ -12,6 +12,10 @@
     </div>
 </template>
 <script>
+import jsyaml from 'js-yaml'
+import { validate_schema, validate_xref } from '../../vnf_modules/validator'
+import { setModel, setCurrentModel, setTargetModel } from '../../vnf_modules/model'
+import { setContext } from '../../vnf_modules/view'
 export default {
     props:    ['model','view','templates'],
     methods: {
@@ -49,14 +53,14 @@ export default {
           object = jsyaml.safeLoad(data);
         }
         catch (err)  {
-          view.modal = "Yaml Error:\n" + err.message
+          this.view.modal = "Yaml Error:\n" + err.message
           return
         }
 
         // verify schema
         msg = validate_schema(object);
         if (msg != '') {
-          view.modal = msg
+          this.view.modal = msg
           setContext("Import")
           return
         }
@@ -64,7 +68,7 @@ export default {
         // verify xrefs
         msg = validate_xref(object);
         if (msg != '') {
-          view.modal = msg
+          this.view.modal = msg
           setContext("Import")
           return
         }
@@ -83,11 +87,11 @@ export default {
         // copy data to model
         if (this.view.mode == "current")
         {
-          current = object
+          setCurrentModel( object )
         }
         else
         {
-          target = object
+          setTargetModel( object )
         }
         setModel(object)
 

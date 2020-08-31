@@ -3,7 +3,7 @@ import {data} from './data'
 
 export let current = jsyaml.safeLoad(data);
 export let target  = jsyaml.safeLoad(data);
-export let  model   = current;
+export let  model  = current;
 
 //------------------------------------------------------------------------------
 
@@ -16,6 +16,32 @@ export function setModel(object) {
   model.images     = object.images
   model.networks   = object.networks
   model.components = object.components
+}
+
+//------------------------------------------------------------------------------
+
+export function setCurrentModel(object) {
+  current.schema     = "1.0.1"
+  current.vnf        = object.vnf
+  current.version    = object.version
+  current.tenant     = object.tenant
+  current.flavors    = object.flavors
+  current.images     = object.images
+  current.networks   = object.networks
+  current.components = object.components
+}
+
+//------------------------------------------------------------------------------
+
+export function setTargetModel(object) {
+  target.schema     = "1.0.1"
+  target.vnf        = object.vnf
+  target.version    = object.version
+  target.tenant     = object.tenant
+  target.flavors    = object.flavors
+  target.images     = object.images
+  target.networks   = object.networks
+  target.components = object.components
 }
 
 //------------------------------------------------------------------------------
