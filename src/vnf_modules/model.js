@@ -112,7 +112,7 @@ export function addComponent() {
   model.components.push({
     uuid: uuid, name: "comp-" + nr,
     placement: "MGMT", flavor: "none", image: "none", min: 1, max: 1, size: 1,
-    volumes: [], componentInterfaces: [], services: [], dependencies: [], userdata: [] } );
+    volumes: [], componentInterfaces: [], services: [], dependencies: [], userdata: "" } );
 }
 
 //------------------------------------------------------------------------------
